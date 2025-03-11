@@ -59,7 +59,7 @@ def efficient_frontier(short_sales=True):
             result.append([target_return, opt.fun])
     return np.array(result) if result else np.array([]).reshape(0, 2)
 
-@app.route('/efficient_frontier', methods=['GET'])
+@app.route('/efficient_frontier', methods=['GET']) # ?short_sales=true/false
 def get_efficient_frontier():
     short_sales = request.args.get('short_sales', 'true').lower() == 'true'
     frontier = efficient_frontier(short_sales=short_sales)
