@@ -10,7 +10,6 @@ def square(num):
 def get_square():
     # Retrieve the number from the query parameter (e.g., /square?num=4)
     num = request.args.get('num', type=int)
-    
     if num is None:
         return jsonify({"error": "Missing 'num' query parameter"}), 400
     
