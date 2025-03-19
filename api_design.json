@@ -1,0 +1,57 @@
+{
+  "NOTE": "All floating point values are to be represented as decimals and not percentage. e.g. 0.5 not 50%.",
+
+  "landing page": "no API needed",
+
+  "funds page": {
+    "efficient_frontier_api": [
+      "list of floating point values representing values on the efficient_frontier"
+    ],
+    "funds_performace_table_api": [
+      {
+        "fund_name": "fund 1 name string",
+        "fund_description": "fund 1 description string",
+        "fund_link": "url to link to fund 1 webpage",
+        "fund_returns": "floating point value for return",
+        "fund_risk": "floating point value for std",
+        "fund_sharpe": "floating point value for sr"
+      },
+      {
+        "fund_name": "fund 2 name string",
+        "fund_description": "fund 2 description string",
+        "fund_link": "url to link to fund 2 webpage",
+        "fund_returns": "floating point value for return",
+        "fund_risk": "floating point value for std",
+        "fund_sharpe": "floating point value for sr"
+      }
+    ],
+    "funds_coorelation_api": [
+      [
+        "two dimensional array of floating point values representing the correlation between funds"
+      ]
+    ]
+  },
+
+  "questionnaire page": "no API needed",
+
+  "portfolio page": {
+    "port_breakdown_api": {
+      "PARAMETERS": "Send a floating point value representing the risk profile, if NONE return error message stating no risk profile found",
+      "ratio": [
+        {
+          "fund_name": "fund 1 name string",
+          "percentage": "floating point value"
+        },
+        {
+          "fund_name": "fund 2 name string",
+          "percentage": "floating point value"
+        }
+      ],
+      "port_performance": {
+        "returns": "floating point value for returns",
+        "risk": "floating point value for std",
+        "sharpe": "floating point value for sr"
+      }
+    }
+  }
+}
