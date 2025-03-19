@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import Paper from "@mui/material/Paper";
 
 import { makeStyles } from "@mui/styles";
 
@@ -72,8 +73,8 @@ const EfficientFrontier = () => {
         },
         title: {
           display: true,
-          text: 'Risk'
-        }
+          text: "Risk",
+        },
       },
       y: {
         ticks: {
@@ -84,14 +85,14 @@ const EfficientFrontier = () => {
         },
         title: {
           display: true,
-          text: 'Returns'
-        }
+          text: "Returns",
+        },
       },
     },
   };
 
   return (
-      <Box className={classes.ipokContainer} display={"block"}>
+      <Box component={Paper} className={classes.ipokContainer} display={"block"}>
         <Line
           data={data}
           options={options}
