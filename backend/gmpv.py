@@ -35,6 +35,10 @@ risk_free_rate = 0.02 / 252  # Annualized 2% converted to daily
 # Compute Sharpe ratios
 sharpe_ratios = (avg_returns - risk_free_rate) / std_devs
 
+
+# Compute correlation matrix
+correlation_matrix = pd.DataFrame(returns, index=fund_tickers).T.corr()
+
 # Portfolio performance 
 # def portfolio_performance(weights, avg_returns, cov_matrix):
 #     ret = np.dot(weights, avg_returns)
@@ -76,6 +80,11 @@ def get_fund_statistics():
             "sharpe_ratio": sharpe_ratios[i]
         })
     return jsonify({"fund_statistics": statistics})
+
+@app.route('/correlation_matrix', methods=['GET'])
+def get_correlation_matrix():
+    return jsonify(correlation_matrix.to_dict())
+
 
 if __name__ == '__main__':
     app.run(debug=True)
