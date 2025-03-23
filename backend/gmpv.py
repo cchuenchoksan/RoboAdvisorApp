@@ -154,10 +154,8 @@ def port_breakdown():
         short_sales = True
         
     optimal_weights = optimal_portfolio(avg_returns, cov_matrix, risk_aversion, short_sales=short_sales)
-    
-    # hao modify
-    # fund_names = 
-    ratio = [{"fund_name": fund_names[i], "percentage": optimal_weights[i]} for i in range(len(fund_names))]
+
+    ratio = [{"stock_name": yf.Ticker(i).info["longName"], "percentage": optimal_weights[i]} for i in range(len(fund_tickers))]
     
     port_return = np.dot(optimal_weights, avg_returns)
     port_risk = np.sqrt(np.dot(optimal_weights.T, np.dot(cov_matrix, optimal_weights)))
