@@ -82,13 +82,16 @@ def get_efficient_frontier():
 def get_fund_statistics():
     statistics = []
     for i, ticker in enumerate(fund_tickers):
+        fund_info = yf.Ticker(ticker).info
         statistics.append({
-            "fund": ticker,
-            "average_return": avg_returns[i],
-            "standard_deviation": std_devs[i],
-            "sharpe_ratio": sharpe_ratios[i]
+            "fund_name": fund_info.get("longName", ticker),
+            "fund_description": fund_info.get("longBusinessSummary", "No description available"),
+            # "fund_link": fund_info.get("website", "No link available"),
+            "fund_returns": avg_returns[i],
+            "fund_risk": std_devs[i],
+            "fund_sharpe": sharpe_ratios[i]
         })
-    return jsonify({"fund_statistics": statistics})
+    return jsonify({"funds_performance_table": statistics})
 
 @app.route('/correlation_matrix', methods=['GET'])
 def get_correlation_matrix():
@@ -155,7 +158,7 @@ def port_breakdown():
         
     optimal_weights = optimal_portfolio(avg_returns, cov_matrix, risk_aversion, short_sales=short_sales)
 
-    ratio = [{"stock_name": yf.Ticker(i).info["longName"], "percentage": optimal_weights[i]} for i in range(len(fund_tickers))]
+    ratio = [{"stock_name": yf.Ticker(fund_tickers[i]).info["longName"], "percentage": optimal_weights[i]} for i in range(len(fund_tickers))]
     
     port_return = np.dot(optimal_weights, avg_returns)
     port_risk = np.sqrt(np.dot(optimal_weights.T, np.dot(cov_matrix, optimal_weights)))
