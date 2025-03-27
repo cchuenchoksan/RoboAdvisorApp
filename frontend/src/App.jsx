@@ -4,6 +4,7 @@ import Navbar from './components/NavBar.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ExploreFundsPage from './pages/ExploreFundsPage.jsx';
 import OptimisePortPage from './pages/OptimisePortPage.jsx';
+import QuestionnairePage from './pages/QuestionnairePage.jsx';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/HomePage" element={<HomePage />} />
         <Route path="/ExploreFundsPage" element={<ExploreFundsPage />} />
         <Route path="/OptimisePortPage" element={<OptimisePortPage />} />
+        <Route path="/QuestionnairePage" element={<QuestionnairePage />} />
       </Routes>
     </Router>
   );
