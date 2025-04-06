@@ -76,13 +76,26 @@ def efficient_frontier(short_sales=True):
         opt = minimize(objective, init_guess, bounds=bounds, constraints=constraints)
         if opt.success:
             result.append([target_return, opt.fun])
-    return np.array(result) if result else np.array([]).reshape(0, 2)
+    result = np.array(result) if result else np.array([]).reshape(0, 2)
+
+    if result.size>0:
+        gmpv_index = np.argmin(result[:, 1])
+        
+        #split
+        above_gmpv = result[gmpv_index+1:]
+        below_gmpv = result[:gmpv_index+1]
+
+        return above_gmpv, below_gmpv
+    else:
+        return np.array([]).reshape(0,2), np.array([]).reshape(0,2)
+
 
 @app.route('/efficient_frontier', methods=['GET']) # ?short_sales=true/false
 def get_efficient_frontier():
     short_sales = request.args.get('short_sales', 'true').lower() == 'true'
-    frontier = efficient_frontier(short_sales=short_sales)
-    res = jsonify({"efficient_frontier": frontier.tolist()})
+    above_gmpv, below_gmpv = efficient_frontier(short_sales=short_sales)
+    #res = jsonify({"efficient_frontier": frontier.tolist()})
+    res = jsonify({"above_gmpv": above_gmpv.tolist(), "below_gmpv": below_gmpv.tolist()})
     # Manually add CORS headers
     res.headers['Access-Control-Allow-Origin'] = '*'
     res.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
