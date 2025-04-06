@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import Box from "@mui/material/Box";
 import { Line } from "react-chartjs-2";
 import {
@@ -12,12 +12,11 @@ import {
   Legend,
 } from "chart.js";
 import Paper from "@mui/material/Paper";
-
 import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   ipokLineContainer: {
-    width: "70vw !important",
+    width: "45vw !important",
   },
   ipokContainer: {
     margin: "1rem !important",
@@ -35,38 +34,59 @@ ChartJS.register(
   Legend
 );
 
-const EfficientFrontier = () => {
+const EfficientFrontier = (props) => {
+  const [efficientFrontierData, setefficientFrontierData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
   const classes = useStyles();
-  const polynomial = (y) => y * y; // x = y^2
-  const points = [];
-  const range = 10;
 
-  for (let y = -range; y <= range; y += 0.1) {
-    const x = polynomial(y);
-    points.push({ x: x, y: Math.round(y * 1000) / 1000 });
-  }
-  const data = {
-    labels: points.map((point) => point.y),
-    datasets: [
-      {
-        label: "Efficient frontier",
-        data: points.map((point) => point.x),
-        borderColor: "rgb(218, 118, 18)",
-        backgroundColor: "rgba(236, 176, 8, 0.8)",
-        fill: false,
-        tension: 0.1,
-      },
-    ],
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/efficient_frontier?short_sales=' + props.shortSales);
+        const result = await response.json();
+        setefficientFrontierData(result);
+        setLoading(false);
+        console.log(result);
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (efficientFrontierData) {
+      setData({
+        labels: efficientFrontierData.efficient_frontier.map((point) => point[0] * 100),
+        datasets: [
+          {
+            label: "Efficient frontier",
+            data: efficientFrontierData.efficient_frontier.map((point) => point[1] * 100),
+            borderColor: "rgb(218, 118, 18)",
+            backgroundColor: "rgba(236, 176, 8, 0.8)",
+            fill: false,
+            tension: 0.1,
+          },
+        ],
+      });
+    }
+  }, [efficientFrontierData]);
 
   const options = {
     responsive: true,
     indexAxis: "y",
+    interaction: {
+      mode: null, // This disables all hover interactions
+    },
     scales: {
       x: {
         beginAtZero: true,
         ticks: {
-          // Include a dollar sign in the ticks
+          // Include a percentage sign in the ticks
           callback: function (value, index, ticks) {
             return value + "%";
           },
@@ -78,7 +98,7 @@ const EfficientFrontier = () => {
       },
       y: {
         ticks: {
-          // Include a dollar sign in the ticks
+          // Include a percentage sign in the ticks
           callback: function (value, index, ticks) {
             return value + "%";
           },
@@ -91,14 +111,20 @@ const EfficientFrontier = () => {
     },
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-      <Box component={Paper} className={classes.ipokContainer} display={"block"}>
+    <Box component={Paper} className={classes.ipokContainer} display={"block"}>
+      {data && (
         <Line
           data={data}
           options={options}
           className={classes.ipokLineContainer}
         />
-      </Box>
+      )}
+    </Box>
   );
 };
 

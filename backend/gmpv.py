@@ -8,6 +8,12 @@ import matplotlib.pyplot as plt
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
+from flask_cors import CORS  # Import CORS
+
+app = Flask(__name__)
+
+# Enable CORS for all routes
+CORS(app)
 
 np.random.seed(42)
 
@@ -76,7 +82,12 @@ def efficient_frontier(short_sales=True):
 def get_efficient_frontier():
     short_sales = request.args.get('short_sales', 'true').lower() == 'true'
     frontier = efficient_frontier(short_sales=short_sales)
-    return jsonify({"efficient_frontier": frontier.tolist()})
+    res = jsonify({"efficient_frontier": frontier.tolist()})
+    # Manually add CORS headers
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    res.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, X-Requested-With'
+    return res
 
 @app.route('/fund_statistics', methods=['GET'])
 def get_fund_statistics():
