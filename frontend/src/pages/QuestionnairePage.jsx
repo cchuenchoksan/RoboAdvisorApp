@@ -43,9 +43,9 @@ function Questionnaire() {
     }, 0);
     console.log(total);
 
-    // navigate("/OptimisePortPage", {
-    //   state: { questionnaireData: formData },
-    // });
+    navigate("/OptimisePortPage", {
+      state: { questionnaireData: formData },
+    });
   };
 
   return (

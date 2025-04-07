@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import Box from "@mui/material/Box";
-import { Line } from "react-chartjs-2";
+// EfficientFrontierChart.jsx
+import React, { useState, useEffect } from "react";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
-} from "chart.js";
-import Paper from "@mui/material/Paper";
+  ResponsiveContainer,
+} from "recharts";
 import { makeStyles } from "@mui/styles";
+import { Box } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
   ipokLineContainer: {
@@ -23,109 +22,136 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// Register necessary components for Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+const transformData = (arr) =>
+    arr
+    //   .filter(([y, x]) => x *100 <= 0.2) // Filter elements where x <= 0.2
+      .map(([y, x]) => ({ risk: x * 100, return: y * 100 }));
 
-const EfficientFrontier = (props) => {
-  const [efficientFrontierData, setefficientFrontierData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
+const EfficientFrontierChart = () => {
+  const [efficientFrontierDataWSS, setefficientFrontierDataWSS] =
+    useState(null);
+  const [efficientFrontierDataWOSS, setefficientFrontierDataWOSS] =
+    useState(null);
+  const [loadingWSS, setLoadingWSS] = useState(true);
+  const [loadingWOSS, setLoadingWOSS] = useState(true);
   const classes = useStyles();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataWSS = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5000/efficient_frontier?short_sales=' + props.shortSales);
+        const response = await fetch(
+          "http://127.0.0.1:5000/efficient_frontier?short_sales=true"
+        );
         const result = await response.json();
-        setefficientFrontierData(result);
-        setLoading(false);
-        console.log(result);
-        
+        setefficientFrontierDataWSS(result);
+        setLoadingWSS(false);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setLoading(false);
+        console.error("Error fetching data:", error);
+        setLoadingWSS(false);
       }
     };
 
-    fetchData();
+    fetchDataWSS();
   }, []);
 
   useEffect(() => {
-    if (efficientFrontierData) {
-      setData({
-        labels: efficientFrontierData.efficient_frontier.map((point) => point[0] * 100),
-        datasets: [
-          {
-            label: "Efficient frontier",
-            data: efficientFrontierData.efficient_frontier.map((point) => point[1] * 100),
-            borderColor: "rgb(218, 118, 18)",
-            backgroundColor: "rgba(236, 176, 8, 0.8)",
-            fill: false,
-            tension: 0.1,
-          },
-        ],
-      });
-    }
-  }, [efficientFrontierData]);
+    const fetchDataWOSS = async () => {
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:5000/efficient_frontier?short_sales=false"
+        );
+        const result = await response.json();
+        setefficientFrontierDataWOSS(result);
+        setLoadingWOSS(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoadingWOSS(false);
+      }
+    };
 
-  const options = {
-    responsive: true,
-    indexAxis: "y",
-    interaction: {
-      mode: null, // This disables all hover interactions
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-        ticks: {
-          // Include a percentage sign in the ticks
-          callback: function (value, index, ticks) {
-            return value + "%";
-          },
-        },
-        title: {
-          display: true,
-          text: "Risk",
-        },
-      },
-      y: {
-        ticks: {
-          // Include a percentage sign in the ticks
-          callback: function (value, index, ticks) {
-            return value + "%";
-          },
-        },
-        title: {
-          display: true,
-          text: "Returns",
-        },
-      },
-    },
-  };
+    fetchDataWOSS();
+  }, []);
 
-  if (loading) {
+  if (
+    efficientFrontierDataWSS === null ||
+    efficientFrontierDataWOSS === null ||
+    loadingWSS ||
+    loadingWOSS
+  ) {
     return <div>Loading...</div>;
   }
 
+  const aboveWSS = transformData(efficientFrontierDataWSS.above_gmpv);
+  const belowWSS = transformData(efficientFrontierDataWSS.below_gmpv);
+
+  const aboveWOSS = transformData(efficientFrontierDataWOSS.above_gmpv);
+  const belowWOSS = transformData(efficientFrontierDataWOSS.below_gmpv);
+
   return (
-    <Box component={Paper} className={classes.ipokContainer} display={"block"}>
-      {data && (
-        <Line
-          data={data}
-          options={options}
-          className={classes.ipokLineContainer}
-        />
-      )}
+    <Box
+      width={"80%"}
+      height={"100%"}
+      display={"flex"}
+      justifyContent={"center"}
+    >
+      <ResponsiveContainer>
+        <LineChart>
+          <XAxis
+            dataKey="risk"
+            type="number"
+            domain={[0, 
+                (dataMax) => Number((dataMax * 1.05).toFixed(2))
+            ]}
+            tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
+          />
+          <YAxis
+            dataKey="return"
+            type="number"
+            domain={[
+              (dataMin) => Number((dataMin * 1.05).toFixed(2)),
+              (dataMax) => Number((dataMax * 1.2).toFixed(2)),
+            ]}
+            tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
+          />
+          <Line
+            type="monotone"
+            data={belowWSS}
+            dataKey="return"
+            stroke="#8884d8" // Color for first line
+            dot={false}
+            activeDot={false}
+          />
+
+          <Line
+            type="monotone"
+            data={aboveWSS}
+            dataKey="return"
+            stroke="#82ca9d" // Color for second line
+            dot={false}
+            activeDot={false}
+          />
+
+          <Line
+            type="monotone"
+            data={belowWOSS}
+            dataKey="return"
+            stroke="#ff7300" // Color for third line
+            dot={false}
+            activeDot={false}
+          />
+
+          <Line
+            type="monotone"
+            data={aboveWOSS}
+            dataKey="return"
+            stroke="#ff0000" // Color for fourth line
+            dot={false}
+            activeDot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
     </Box>
   );
 };
 
-export default EfficientFrontier;
+export default EfficientFrontierChart;
