@@ -266,8 +266,8 @@ def port_breakdown():
 
     return jsonify(response)
 
-@app.route('/port_breakdown_api', methods=['POST'])
-def port_breakdown():
+@app.route('/ratio_breakdown_api', methods=['POST'])
+def ratio_breakdown():
     data = request.get_json()
     risk_aversion = data.get("risk_aversion")
 
