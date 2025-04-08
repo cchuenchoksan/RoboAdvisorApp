@@ -266,6 +266,33 @@ def port_breakdown():
 
     return jsonify(response)
 
+@app.route('/port_breakdown_api', methods=['POST'])
+def port_breakdown():
+    data = request.get_json()
+    risk_aversion = data.get("risk_aversion")
+
+    if risk_aversion is None:
+        return jsonify({"error": "No risk profile found"}), 400
+
+    if risk_aversion < 1e-6:
+        short_sales = False
+    else:
+        short_sales = True
+
+    optimal_weights = optimal_portfolio(
+        avg_returns, cov_matrix, risk_aversion, short_sales=short_sales
+    )
+
+    ratio = [
+        {
+            "stock_name": yf.Ticker(fund_tickers[i]).info["longName"],
+            "percentage": optimal_weights[i],
+        }
+        for i in range(len(fund_tickers))
+    ]
+
+    return jsonify(ratio)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
