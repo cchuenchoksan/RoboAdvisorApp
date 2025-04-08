@@ -125,6 +125,31 @@ def get_efficient_frontier():
     )
     return res
 
+@app.route('/portfolio_performance', methods=['POST'])
+def portfolio_performance():
+    """API to get the performance of the optimal portfolio over the last 30 days."""
+    data = request.get_json()
+    risk_aversion = data.get('risk_aversion')
+    period = data.get('period', 30)  # Default to 30 days if not provided
+    period  = min(period, 252*2)  # Limit to max 2 years
+
+    if risk_aversion is None:
+        return jsonify({"error": "No risk profile found"}), 400
+
+    
+    short_sales = risk_aversion >= 1e-6
+
+    # Calculate optimal portfolio weights
+    optimal_weights = optimal_portfolio(avg_returns, cov_matrix, risk_aversion, short_sales=short_sales)
+
+    # Calculate portfolio performance over the last periods
+    last_period_returns = fund_data.iloc[-period:].pct_change().dropna()
+    portfolio_values = [1000] 
+    for daily_return in last_period_returns.values:
+        portfolio_values.append(portfolio_values[-1] * (1 + np.dot(optimal_weights, daily_return)))
+    performance_data = [{"day": f"Day {i+1}", "value": value} for i, value in enumerate(portfolio_values)]
+
+    return jsonify({"performance_data": performance_data})
 
 @app.route("/fund_statistics", methods=["GET"])
 def get_fund_statistics():
@@ -164,7 +189,7 @@ def optimal_portfolio(mean_returns, cov_matrix, risk_aversion, short_sales):
     num_assets = len(mean_returns)
     constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
     constraints = LinearConstraint(np.ones(num_assets), 1, 1)
-    bounds = None if short_sales else [(0, 1)] * num_assets
+    bounds = [(-0.5, 1.5)] * num_assets if short_sales else [(0, 1)] * num_assets # add some short sales limits
 
     best_result = None
     best_utility = float("-inf")
