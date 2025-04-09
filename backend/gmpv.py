@@ -80,7 +80,8 @@ def efficient_frontier(short_sales=True):
             {"type": "eq", "fun": lambda w: np.sum(w) - 1},
             {"type": "eq", "fun": lambda w: np.dot(w, avg_returns) - target_return},
         ]
-        bounds = None if short_sales else [(0, 1)] * num_assets
+        # bounds = None if short_sales else [(0, 1)] * num_assets
+        bounds = [(-1, 1)] * num_assets if short_sales else [(0, 1)] * num_assets
         init_guess = np.ones(num_assets) / num_assets
         opt = minimize(
             objective,
@@ -189,7 +190,7 @@ def optimal_portfolio(mean_returns, cov_matrix, risk_aversion, short_sales):
     num_assets = len(mean_returns)
     constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
     constraints = LinearConstraint(np.ones(num_assets), 1, 1)
-    bounds = [(-0.5, 1.5)] * num_assets if short_sales else [(0, 1)] * num_assets # add some short sales limits
+    bounds = [(-1, 1)] * num_assets if short_sales else [(0, 1)] * num_assets # add some short sales limits
 
     best_result = None
     best_utility = float("-inf")
