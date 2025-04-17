@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PortfolioPieChart from "../components/PortfolioPieChart";
 import ScoreProgress from "../components/ScoreProgress";
+import PortfolioPerformanceChart from "../components/PortfolioPerformanceChart";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -38,6 +39,7 @@ function OptimisePortPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
+  const [riskAversion, setRiskAversion] = useState(0.5); 
 
   // get data from questionnare
   const questionnaireData = location.state?.questionnaireData || null;
@@ -72,13 +74,13 @@ function OptimisePortPage() {
           </Box>
 
           {/* 右边：折线图 */}
-          <Box sx={{ flex: "1 1 70%", p: 2, border: "1px solid grey", borderRadius: 1 }}>
+          {/* <Box sx={{ flex: "1 1 70%", p: 2, border: "1px solid grey", borderRadius: 1 }}>
             <Typography variant="h6" gutterBottom>
               Portfolio Performance (Past 30 Days)
             </Typography>
             <LineChart
-              width={600}
-              height={400}
+              width={900}
+              height={600}
               data={performanceData}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
@@ -89,7 +91,8 @@ function OptimisePortPage() {
               <LineLegend />
               <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
             </LineChart>
-          </Box>
+          </Box> */}
+          <PortfolioPerformanceChart riskAversion={riskAversion} />
         </Box>
       ) : (
         // 初始页面
