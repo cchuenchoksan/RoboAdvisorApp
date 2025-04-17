@@ -17,7 +17,7 @@ CORS(app)
 
 np.random.seed(42)
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
 # Fund tickers (replace with actual tickers if available)
 fund_tickers = [
