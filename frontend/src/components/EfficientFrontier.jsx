@@ -5,13 +5,10 @@ import {
   Line,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { makeStyles } from "@mui/styles";
-import { Box } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
   ipokLineContainer: {
@@ -23,9 +20,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const transformData = (arr) =>
-    arr
+  arr
     //   .filter(([y, x]) => x *100 <= 0.2) // Filter elements where x <= 0.2
-      .map(([y, x]) => ({ risk: x * 100, return: y * 100 }));
+    .map(([y, x]) => ({ risk: x * 100, return: y * 100 }));
 
 const EfficientFrontierChart = () => {
   const [efficientFrontierDataWSS, setefficientFrontierDataWSS] =
@@ -88,68 +85,73 @@ const EfficientFrontierChart = () => {
   const belowWOSS = transformData(efficientFrontierDataWOSS.below_gmpv);
 
   return (
-    <Box
-      width={"80%"}
-      height={"100%"}
-      display={"flex"}
-      justifyContent={"center"}
-    >
-      <ResponsiveContainer>
-        <LineChart>
-          <XAxis
-            dataKey="risk"
-            type="number"
-            domain={[0, 
-                (dataMax) => Number((dataMax * 1.05).toFixed(2))
-            ]}
-            tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
-          />
-          <YAxis
-            dataKey="return"
-            type="number"
-            domain={[
-              (dataMin) => Number((dataMin * 1.05).toFixed(2)),
-              (dataMax) => Number((dataMax * 1.2).toFixed(2)),
-            ]}
-            tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
-          />
-          <Line
-            type="monotone"
-            data={belowWSS}
-            dataKey="return"
-            stroke="#8884d8" // Color for first line
-            dot={false}
-            activeDot={false}
-          />
+    <Box width={"80%"}
+    height={"100%"} 
+    display={"flex"}
+    justifyContent={"center"}
+    alignItems={"center"}
+    component={Paper}>
+      <Box
+        width={"90%"}
+        height={"90%"}
+        display={"flex"}
+        justifyContent={"center"}
+      >
+        <ResponsiveContainer>
+          <LineChart>
+            <XAxis
+              dataKey="risk"
+              type="number"
+              domain={[0, (dataMax) => Number((dataMax * 1.05).toFixed(2))]}
+              tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
+            />
+            <YAxis
+              dataKey="return"
+              type="number"
+              domain={[
+                (dataMin) => Number((dataMin * 1.05).toFixed(2)),
+                (dataMax) => Number((dataMax * 1.2).toFixed(2)),
+              ]}
+              tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
+            />
+            <Line
+              type="monotone"
+              data={belowWSS}
+              dataKey="return"
+              stroke="#8884d8" // Color for first line
+              dot={false}
+              activeDot={false}
+            />
 
-          <Line
-            type="monotone"
-            data={aboveWSS}
-            dataKey="return"
-            stroke="#82ca9d" // Color for second line
-            dot={false}
-            activeDot={false}
-          />
+            <Line
+              type="monotone"
+              data={aboveWSS}
+              dataKey="return"
+              stroke="#82ca9d" // Color for second line
+              dot={false}
+              activeDot={false}
+            />
 
-          <Line
-            type="monotone"
-            data={belowWOSS}
-            dataKey="return"
-            stroke="#ff7300" // Color for third line
-            dot={false}
-            activeDot={false}
-          />
+            <Line
+              type="monotone"
+              data={belowWOSS}
+              dataKey="return"
+              stroke="#ff7300" // Color for third line
+              dot={false}
+              activeDot={false}
+            />
 
-          <Line
-            type="monotone"
-            data={aboveWOSS}
-            dataKey="return"
-            stroke="#ff0000" // Color for fourth line
-            dot={false}
-            activeDot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+            <Line
+              type="monotone"
+              data={aboveWOSS}
+              dataKey="return"
+              stroke="#ff0000" // Color for fourth line
+              dot={false}
+              activeDot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </Box>
     </Box>
   );
 };

@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
 
-function ScoreProgress({ score, maxScore = 10, styleLabel = "Moderate" }) {
+function ScoreProgress({ score, maxScore = 100, styleLabel = "Moderate" }) {
   // 计算进度百分比
   const progress = (score / maxScore) * 100;
 

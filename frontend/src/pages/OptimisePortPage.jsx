@@ -1,45 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PortfolioPieChart from "../components/PortfolioPieChart";
+import PortfolioBarChart from "../components/PortfolioBarChart";
 import ScoreProgress from "../components/ScoreProgress";
 import PortfolioPerformanceChart from "../components/PortfolioPerformanceChart";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import robotImage from "../assets/robot.png";
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as LineTooltip, Legend as LineLegend } from "recharts";
+import InvestmentBotPrompt from "../components/OptimiseLanding";
+import axios from "axios";
+import CircularProgress from "@mui/material/CircularProgress";
 
-// TODO: Fake Data: portfolio weight
-const portfolioData = [
-  { name: "Stocks", value: 40 },
-  { name: "Bonds", value: 30 },
-  { name: "Real Estate", value: 20 },
-  { name: "Cash", value: 10 },
-];
+// // TODO: Fake Data: performance of optimal portfolio in last 30 days
+// const performanceData = [
+//   { day: "Day 1", value: 1000 },
+//   { day: "Day 5", value: 1020 },
+//   { day: "Day 10", value: 1010 },
+//   { day: "Day 15", value: 1050 },
+//   { day: "Day 20", value: 1080 },
+//   { day: "Day 25", value: 1070 },
+//   { day: "Day 30", value: 1100 },
+// ];
 
-// TODO: Fake Data: performance of optimal portfolio in last 30 days
-const performanceData = [
-  { day: "Day 1", value: 1000 },
-  { day: "Day 5", value: 1020 },
-  { day: "Day 10", value: 1010 },
-  { day: "Day 15", value: 1050 },
-  { day: "Day 20", value: 1080 },
-  { day: "Day 25", value: 1070 },
-  { day: "Day 30", value: 1100 },
-];
 
-// TODO: Fake Data: Questionnaire
-const fakeQuestionnaireData = {
-  utilityScore: 8,
-  riskTolerance_score: "Moderate",
-};
+function dataToleranceMap(score) {
+  if (score < 0 || score > 100 || typeof score !== 'number') {
+      return 'Invalid score';
+  }
+
+  if (score >= 0 && score <= 25) {
+      return 'Very cautious';
+  } else if (score >= 26 && score <= 33) {
+      return 'Cautious';
+  } else if (score >= 34 && score <= 44) {
+      return 'Moderately cautious';
+  } else if (score >= 45 && score <= 56) {
+      return 'Balanced';
+  } else if (score >= 57 && score <= 67) {
+      return 'Moderately aggressive';
+  } else if (score >= 68 && score <= 79) {
+      return 'Aggressive';
+  } else if (score >= 80 && score <= 100) {
+      return 'Very aggressive';
+  }
+}
 
 function OptimisePortPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
-  const [riskAversion, setRiskAversion] = useState(0.5); 
+  const [riskAversion, setRiskAversion] = useState(0.5);
+  const [portfolioData, setPortfolioData] = useState(null);
 
   // get data from questionnare
   const questionnaireData = location.state?.questionnaireData || null;
@@ -48,33 +57,68 @@ function OptimisePortPage() {
     navigate("/QuestionnairePage");
   };
 
+  if (questionnaireData === null) {
+    return <InvestmentBotPrompt handleButtonClick={handleButtonClick} />;
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          "http://127.0.0.1:5000/ratio_breakdown_api?risk_aversion=" +
+            questionnaireData
+        );
+
+        setPortfolioData(res.data);
+      } catch (err) {
+        console.error("Error fetching ratio breakdown:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (portfolioData === null) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  questionnaireData
+
   return (
     <Box sx={{ p: 3 }}>
-      {questionnaireData ? (
-        // 问卷提交后的页面
-        <Box sx={{ display: "flex", gap: 3 }}>
-          {/* 左边：得分和饼图 */}
-          <Box sx={{ flex: "1 1 30%", display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", gap: 3 }}>
+        {/* 左边：得分和饼图 */}
+        <Box
+          sx={{
+            flex: "1 1 30%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
+          <ScoreProgress
+            score={questionnaireData}
+            styleLabel={dataToleranceMap(questionnaireData)}
+          />
 
-            <ScoreProgress
-              score={fakeQuestionnaireData.utilityScore}
-              styleLabel={fakeQuestionnaireData.riskTolerance_score}
-            />
+          <PortfolioBarChart data={portfolioData} />
 
-            <PortfolioPieChart data={portfolioData} />
+          {/* 重新测试按钮 */}
+          <Button
+            variant="contained"
+            onClick={() => navigate("/QuestionnairePage")}
+            sx={{ mt: 2 }}
+          >
+            Take Test Again
+          </Button>
+        </Box>
 
-            {/* 重新测试按钮 */}
-            <Button
-              variant="contained"
-              onClick={() => navigate("/QuestionnairePage")}
-              sx={{ mt: 2 }}
-            >
-              Take Test Again
-            </Button>
-          </Box>
-
-          {/* 右边：折线图 */}
-          {/* <Box sx={{ flex: "1 1 70%", p: 2, border: "1px solid grey", borderRadius: 1 }}>
+        {/* 右边：折线图 */}
+        {/* <Box sx={{ flex: "1 1 70%", p: 2, border: "1px solid grey", borderRadius: 1 }}>
             <Typography variant="h6" gutterBottom>
               Portfolio Performance (Past 30 Days)
             </Typography>
@@ -92,52 +136,8 @@ function OptimisePortPage() {
               <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
             </LineChart>
           </Box> */}
-          <PortfolioPerformanceChart riskAversion={riskAversion} />
-        </Box>
-      ) : (
-        // 初始页面
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            mb: 4,
-          }}
-        >
-          <Box
-            component="img"
-            src={robotImage}
-            alt="Investment Bot"
-            sx={{
-              width: 150,
-              height: 150,
-              mb: 2,
-            }}
-          />
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 2,
-              textAlign: "center",
-              color: "text.primary",
-            }}
-          >
-            If you want the portfolio that best fits you, take the test now!
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={handleButtonClick}
-            sx={{
-              mt: 2,
-              mb: 2,
-              px: 4,
-              py: 1,
-            }}
-          >
-            Take Test
-          </Button>
-        </Box>
-      )}
+        <PortfolioPerformanceChart riskAversion={riskAversion} />
+      </Box>
     </Box>
   );
 }

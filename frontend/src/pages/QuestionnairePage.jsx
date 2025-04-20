@@ -44,7 +44,7 @@ function Questionnaire() {
     console.log(total);
 
     navigate("/OptimisePortPage", {
-      state: { questionnaireData: formData },
+      state: { questionnaireData: total },
     });
   };
 

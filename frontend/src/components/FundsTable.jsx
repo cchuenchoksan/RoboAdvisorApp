@@ -1,91 +1,97 @@
-import * as React from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
+import React, { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 
-function createData(name, desc, ret, std, sr) {
-  return { name, desc, ret, std, sr };
+const API_URL = "http://127.0.0.1:5000/fund_statistics";
+
+function formatPercentage(value) {
+  return (value * 100).toFixed(2) + "%";
 }
 
-const rows = [
-  createData(
-    "Eastspring Investments - Japan Dynamic Fund",
-    "An amazing fund in Japan",
-    10,
-    2,
-    5
-  ),
-  createData(
-    "BGF Asian High Yield Bond A8 SGD",
-    "Vivi's favorite fund",
-    5,
-    0.5,
-    10
-  ),
-  createData("Allianz Global Oppc Bd AMg H2 SGD", "Insurance fund", -2, 2, -1),
-  createData(
-    "PIMCO GIS Income E SGD Hedged Inc",
-    "Cheen Hao's recommended fund",
-    4,
-    0.8,
-    5
-  ),
-  createData(
-    "JPMorgan Funds - Emerging Markets Dividend Fund",
-    "Scammed Fund",
-    -3,
-    0.4,
-    -7.5
-  ),
-  createData(
-    "Natixis International Funds (Lux) I - Harris Associates U.S. Value Equity Fund S/A(USD)",
-    "Some random US fund stuff I dont know",
-    7,
-    0.8,
-    8.75
-  ),
-];
+export default function FundStatisticsTable() {
+  const [funds, setFunds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default function BasicTable() {
+  useEffect(() => {
+    fetch(API_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch fund statistics.");
+        return res.json();
+      })
+      .then((data) => {
+        setFunds(data.funds_performance_table);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Box display={"block"}>
+    <Box mt={4}>
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <Table sx={{ minWidth: 650 }} aria-label="funds table">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "Bold" }}>Funds</TableCell>
-              <TableCell align="right" sx={{ fontWeight: "Bold" }}>
+              <TableCell sx={{ fontWeight: "bold" }}>Fund Name</TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
                 Description
               </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "Bold" }}>
-                Average Returns (%)
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                Avg Returns (%)
               </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "Bold" }}>
-                Average Risk (std %)
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                Risk (std %)
               </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "Bold" }}>
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
                 Sharpe Ratio
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow
-                key={row.name}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
+            {funds.map((fund) => (
+              <TableRow key={fund.fund_name}>
                 <TableCell component="th" scope="row">
-                  {row.name}
+                  {fund.fund_name}
                 </TableCell>
-                <TableCell align="right">{row.desc}</TableCell>
-                <TableCell align="right">{row.ret}</TableCell>
-                <TableCell align="right">{row.std}</TableCell>
-                <TableCell align="right">{row.sr}</TableCell>
+                <TableCell align="right">{fund.fund_description}</TableCell>
+                <TableCell align="right">
+                  {formatPercentage(fund.fund_returns)}
+                </TableCell>
+                <TableCell align="right">
+                  {formatPercentage(fund.fund_risk)}
+                </TableCell>
+                <TableCell align="right">
+                  {fund.fund_sharpe.toFixed(4)}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

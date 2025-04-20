@@ -3,13 +3,11 @@ import Box from "@mui/material/Box";
 
 import EfficientFrontierChart from "../components/EfficientFrontier";
 import FundsTable from "../components/FundsTable";
-
-import { makeStyles } from "@mui/styles";
+import CorrelationMatrix from "../components/heatmap";
 
 const ExploreFundsPage = () => {
   return (
     <Box>
-      
       <Box display={"flex"} justifyContent={"center"} marginTop={"2vh"}>
         <Box
           display={"flex"}
@@ -19,18 +17,24 @@ const ExploreFundsPage = () => {
           Efficient Frontier
         </Box>
       </Box>
-      
+
       <Box display={"flex"} justifyContent={"center"} height={"45vh"}>
         <EfficientFrontierChart />
       </Box>
 
       <Box display={"flex"} justifyContent={"center"}>
         <Box width={"90vw"}>
-        <FundsTable />
+          <FundsTable />
         </Box>
       </Box>
-
-      {/* <EfficientFrontierChart /> */}
+      <Box
+        display={"flex"}
+        justifyContent={"center"}
+        height={"60vh"}
+        width={"100"}
+      >
+        <CorrelationMatrix />
+      </Box>
     </Box>
   );
 };

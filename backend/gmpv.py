@@ -126,6 +126,7 @@ def get_efficient_frontier():
     )
     return res
 
+
 @app.route('/portfolio_performance', methods=['POST'])
 def portfolio_performance():
     """API to get the performance of the optimal portfolio over the last 30 days."""
@@ -152,6 +153,7 @@ def portfolio_performance():
 
     return jsonify({"performance_data": performance_data})
 
+
 @app.route("/fund_statistics", methods=["GET"])
 def get_fund_statistics():
     statistics = []
@@ -169,7 +171,14 @@ def get_fund_statistics():
                 "fund_sharpe": sharpe_ratios[i],
             }
         )
-    return jsonify({"funds_performance_table": statistics})
+    res = jsonify({"funds_performance_table": statistics})
+    # Manually add CORS headers
+    res.headers["Access-Control-Allow-Origin"] = "*"
+    res.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    res.headers["Access-Control-Allow-Headers"] = (
+        "Origin, Content-Type, X-Requested-With"
+    )
+    return res
 
 
 @app.route("/correlation_matrix", methods=["GET"])
@@ -183,6 +192,15 @@ def utility_function(weights, mean_returns, cov_matrix, risk_aversion):
     returns = np.dot(weights, mean_returns)
     risk = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
     return -(returns - 0.5 * risk_aversion * risk**2)
+
+
+def profile_to_risk_aversion(risk_profile_score, min_A=1, max_A=20):
+    """
+    Converts a risk profile score (0-100) to a risk aversion coefficient A.
+    Higher scores mean less risk aversion.
+    """
+    normalized_score = risk_profile_score / 100  # 0 to 1
+    return max_A - normalized_score * (max_A - min_A)
 
 
 def optimal_portfolio(mean_returns, cov_matrix, risk_aversion, short_sales):
@@ -267,14 +285,16 @@ def port_breakdown():
 
     return jsonify(response)
 
-@app.route('/ratio_breakdown_api', methods=['POST'])
+@app.route('/ratio_breakdown_api', methods=['GET'])
 def ratio_breakdown():
-    data = request.get_json()
-    risk_aversion = data.get("risk_aversion")
-
-    if risk_aversion is None:
+    # data = request.get_json()
+    # risk_aversion = data.get("risk_aversion")
+    risk_profile = float(request.args.get("risk_aversion"))
+    if risk_profile is None:
         return jsonify({"error": "No risk profile found"}), 400
 
+    risk_aversion = profile_to_risk_aversion(risk_profile)
+    
     if risk_aversion < 1e-6:
         short_sales = False
     else:
@@ -286,13 +306,20 @@ def ratio_breakdown():
 
     ratio = [
         {
-            "stock_name": yf.Ticker(fund_tickers[i]).info["longName"],
-            "percentage": optimal_weights[i],
+            "name": yf.Ticker(fund_tickers[i]).info["shortName"],
+            "value": optimal_weights[i] * 100,
         }
         for i in range(len(fund_tickers))
     ]
+    res = jsonify(ratio)
+    # Manually add CORS headers
+    res.headers["Access-Control-Allow-Origin"] = "*"
+    res.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    res.headers["Access-Control-Allow-Headers"] = (
+        "Origin, Content-Type, X-Requested-With"
+    )
 
-    return jsonify(ratio)
+    return res
 
 
 if __name__ == "__main__":
