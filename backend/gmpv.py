@@ -17,6 +17,7 @@ CORS(app)
 
 np.random.seed(42)
 
+short_sale_threshold = 10  # Risk aversion threshold for short sales
 # app = Flask(__name__)
 
 # Fund tickers (replace with actual tickers if available)
@@ -141,7 +142,7 @@ def portfolio_performance():
     if risk_aversion is None:
         return jsonify({"error": "No risk profile found"}), 400
 
-    short_sales = risk_aversion >= 1e-6
+    short_sales = risk_aversion <= short_sale_threshold  # if risk aversion is lower than the threshold, which means risk seeking, then allow short sales
 
     # Calculate optimal portfolio weights
     optimal_weights = optimal_portfolio(avg_returns, cov_matrix, risk_aversion, short_sales=short_sales)
@@ -256,7 +257,7 @@ def port_breakdown():
     if risk_aversion is None:
         return jsonify({"error": "No risk profile found"}), 400
 
-    if risk_aversion < 1e-6:
+    if risk_aversion > short_sale_threshold:
         short_sales = False
     else:
         short_sales = True
@@ -297,7 +298,7 @@ def ratio_breakdown():
 
     risk_aversion = profile_to_risk_aversion(risk_profile)
     
-    if risk_aversion < 1e-6:
+    if risk_aversion > short_sale_threshold:
         short_sales = False
     else:
         short_sales = True
