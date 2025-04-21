@@ -106,10 +106,32 @@ def efficient_frontier(short_sales=True):
         # split
         above_gmpv = result[gmpv_index:]
         below_gmpv = result[: gmpv_index + 1]
+        gmvp_point = result[gmpv_index]
 
-        return above_gmpv, below_gmpv
+        return above_gmpv, below_gmpv, gmvp_point
     else:
         return np.array([]).reshape(0, 2), np.array([]).reshape(0, 2)
+    
+@app.route("/gmvp", methods=["GET"])  # ?short_sales=true/false
+def get_gmvp_point():
+    short_sales = request.args.get("short_sales", "true").lower() == "true"
+    _, _, gmvp_point = efficient_frontier(short_sales=short_sales)
+
+    if gmvp_point.size > 0:
+        res = jsonify({
+            "expected_return": gmvp_point[0],
+            "volatility": gmvp_point[1]
+        })
+    else:
+        res = jsonify({"error": "GMVP not found"})
+
+    res.headers["Access-Control-Allow-Origin"] = "*"
+    res.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    res.headers["Access-Control-Allow-Headers"] = (
+        "Origin, Content-Type, X-Requested-With"
+    )
+    return res
+
 
 
 @app.route("/efficient_frontier", methods=["GET"])  # ?short_sales=true/false
