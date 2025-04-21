@@ -17,6 +17,10 @@ CORS(app)
 
 np.random.seed(42)
 
+df = pd.read_csv("./fund_info.csv", delimiter="|", index_col="ticker")
+
+fund_descriptions_dict = df.to_dict("index")
+
 short_sale_threshold = 10  # Risk aversion threshold for short sales
 # app = Flask(__name__)
 
@@ -213,9 +217,10 @@ def get_fund_statistics():
             {   
                 "fund_ticker": fund_tickers[i],
                 "fund_name": fund_info.get("longName", ticker),
-                "fund_description": fund_info.get(
-                    "longBusinessSummary", "No description available"
-                ),
+                # "fund_description": fund_info.get(
+                #     "longBusinessSummary", "No description available"
+                # ),
+                "fund_description": fund_descriptions_dict[fund_tickers[i]]["short_description"],
                 # "fund_link": fund_info.get("website", "No link available"),
                 "fund_returns": avg_returns[i],
                 "fund_risk": std_devs[i],

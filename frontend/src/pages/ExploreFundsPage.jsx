@@ -65,7 +65,7 @@ const ExploreFundsPage = () => {
 
   return (
     <Box>
-      <Box display={"flex"} justifyContent={"center"} marginTop={"2vh"}>
+      <Box display={"flex"} justifyContent={"center"} marginTop={"3vh"} marginBottom={"1vh"}>
         <Box
           display={"flex"}
           justifyContent={"center"}
@@ -79,7 +79,7 @@ const ExploreFundsPage = () => {
         <EfficientFrontierChart />
       </Box>
 
-      <Box display={"flex"} justifyContent={"center"} marginTop={"2vh"}>
+      <Box display={"flex"} justifyContent={"center"} marginTop={"7vh"}>
         <Box
           display={"flex"}
           justifyContent={"center"}
@@ -127,7 +127,7 @@ const ExploreFundsPage = () => {
         )}
       </Box>
 
-      <Box display={"flex"} justifyContent={"center"} marginTop={"2vh"}>
+      <Box display={"flex"} justifyContent={"center"} marginTop={"7vh"}>
         <Box
           display={"flex"}
           justifyContent={"center"}
@@ -141,7 +141,7 @@ const ExploreFundsPage = () => {
           <FundsTable />
         </Box>
       </Box>
-      <Box display={"flex"} justifyContent={"center"} marginTop={"2vh"}>
+      <Box display={"flex"} justifyContent={"center"} marginTop={"7vh"} marginBottom={"2vh"}>
         <Box
           display={"flex"}
           justifyContent={"center"}
