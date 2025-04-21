@@ -15,7 +15,7 @@ import {
 const API_URL = "http://127.0.0.1:5000/fund_statistics";
 
 function formatPercentage(value) {
-  return (value * 100).toFixed(2) + "%";
+  return (value * 100).toFixed(4) + "%";
 }
 
 export default function FundStatisticsTable() {
@@ -57,10 +57,27 @@ export default function FundStatisticsTable() {
 
   return (
     <Box mt={4}>
-      <TableContainer component={Paper}>
+      <TableContainer
+        width="80%"
+        height="100%"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        component={Paper}
+        padding={4}
+        elevation={3} // stronger shadow
+        sx={{
+          transition: "transform 0.3s ease, box-shadow 0.3s ease",
+          "&:hover": {
+            transform: "translateY(-2px) scale(1.0001)",
+            boxShadow: 5,
+          },
+        }}
+      >
         <Table sx={{ minWidth: 650 }} aria-label="funds table">
           <TableHead>
             <TableRow>
+              <TableCell sx={{ fontWeight: "bold" }}>Ticker</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Fund Name</TableCell>
               <TableCell align="right" sx={{ fontWeight: "bold" }}>
                 Description
@@ -79,6 +96,7 @@ export default function FundStatisticsTable() {
           <TableBody>
             {funds.map((fund) => (
               <TableRow key={fund.fund_name}>
+                <TableCell>{fund.fund_ticker}</TableCell>
                 <TableCell component="th" scope="row">
                   {fund.fund_name}
                 </TableCell>

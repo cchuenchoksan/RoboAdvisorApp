@@ -10,7 +10,7 @@ import {
   ZAxis,
   Tooltip,
   Legend,
-  ComposedChart
+  ComposedChart,
 } from "recharts";
 import { makeStyles } from "@mui/styles";
 import { Box, Paper, CircularProgress } from "@mui/material";
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "4px",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
     fontSize: "12px",
-  }
+  },
 }));
 
 const COLORS = [
@@ -50,47 +50,65 @@ const transformData = (arr) =>
     //   .filter(([y, x]) => x *100 <= 0.2) // Filter elements where x <= 0.2
     .map(([y, x]) => ({ risk: x * 100, return: y * 100 }));
 
-  
 const transformFunds = (arr) =>
   arr.map((x, index) => ({
-    risk: x["fund_risk"] * 100, 
+    risk: x["fund_risk"] * 100,
     return: x["fund_returns"] * 100,
     colorIndex: index % COLORS.length,
     name: x.fund_name,
-    // Add a type marker to identify scatter points
-    dataType: "fund"
+    dataType: "fund",
   }));
 
 // Custom shape for the scatter points
 const CustomizedShape = (props) => {
   const { cx, cy, payload } = props;
   const color = COLORS[payload.colorIndex];
-  
-  return (
-    <circle cx={cx} cy={cy} r={4} fill={color} />
-  );
+
+  return <circle cx={cx} cy={cy} r={6} fill={color} />;
 };
 
 // Custom tooltip that only shows for points with dataType="fund"
 const CustomTooltip = (props) => {
   const { active, payload, classes } = props;
-  
+
   if (active && payload && payload.length) {
     // Find the payload item that has dataType="fund"
-    const fundPayload = payload.find(p => p.payload && p.payload.dataType === "fund");
-    
+    const fundPayload = payload.find(
+      (p) => p.payload && p.payload.dataType === "fund"
+    );
+
     if (fundPayload) {
       return (
         <div className={props.classes.customTooltip}>
-          <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>{fundPayload.payload.name}</p>
-          <p style={{ margin: "2px 0" }}>Risk: {fundPayload.payload.risk.toFixed(2)}%</p>
-          <p style={{ margin: "2px 0" }}>Return: {fundPayload.payload.return.toFixed(2)}%</p>
+          <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
+            {fundPayload.payload.name}
+          </p>
+          <p style={{ margin: "2px 0" }}>
+            Risk: {fundPayload.payload.risk.toFixed(2)}%
+          </p>
+          <p style={{ margin: "2px 0" }}>
+            Return: {fundPayload.payload.return.toFixed(2)}%
+          </p>
         </div>
       );
     }
   }
-  
+
   return null;
+};
+
+const CustomSquare = (props) => {
+  const { cx, cy, fill } = props;
+  const size = 8;
+  return (
+    <rect
+      x={cx - size / 2}
+      y={cy - size / 2}
+      width={size}
+      height={size}
+      fill={fill}
+    />
+  );
 };
 
 const EfficientFrontierChart = () => {
@@ -98,11 +116,16 @@ const EfficientFrontierChart = () => {
     useState(null);
   const [efficientFrontierDataWOSS, setefficientFrontierDataWOSS] =
     useState(null);
-  const [funds, setFunds] = useState(null)
+  const [funds, setFunds] = useState(null);
+  const [gmvpWSS, setGmvpWSS] = useState(null);
+  const [gmvpWOSS, setGmvpWOSS] = useState(null);
 
   const [loadingWSS, setLoadingWSS] = useState(true);
   const [loadingWOSS, setLoadingWOSS] = useState(true);
   const [loadingFunds, setLoadingFunds] = useState(true);
+  const [loadingGmvpWSS, setLoadingGmvpWSS] = useState(true);
+  const [loadingGmvpWOSS, setLoadingGmvpWOSS] = useState(true);
+
   const classes = useStyles();
 
   useEffect(() => {
@@ -142,33 +165,74 @@ const EfficientFrontierChart = () => {
   }, []);
 
   useEffect(() => {
-      fetch("http://127.0.0.1:5000/fund_statistics")
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch fund statistics.");
-          return res.json();
-        })
-        .then((data) => {
-          setFunds(data.funds_performance_table);
-          setLoadingFunds(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoadingFunds(false);
-        });
-    }, []);
-  
+    fetch("http://127.0.0.1:5000/fund_statistics")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch fund statistics.");
+        return res.json();
+      })
+      .then((data) => {
+        setFunds(data.funds_performance_table);
+        setLoadingFunds(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoadingFunds(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    const fetchGmvpWSS = async () => {
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:5000/gmvp?short_sales=true"
+        );
+        const result = await response.json();
+        setGmvpWSS(result);
+        setLoadingGmvpWSS(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoadingGmvpWSS(false);
+      }
+    };
+
+    fetchGmvpWSS();
+  }, []);
+
+  useEffect(() => {
+    const fetchGmvpWOSS = async () => {
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:5000/gmvp?short_sales=false"
+        );
+        const result = await response.json();
+        setGmvpWOSS(result);
+        setLoadingGmvpWOSS(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoadingGmvpWOSS(false);
+      }
+    };
+
+    fetchGmvpWOSS();
+  }, []);
 
   if (
     efficientFrontierDataWSS === null ||
     efficientFrontierDataWOSS === null ||
     funds === null ||
+    gmvpWSS === null ||
+    gmvpWOSS === null ||
     loadingWSS ||
     loadingWOSS ||
-    loadingFunds
+    loadingFunds ||
+    loadingGmvpWSS ||
+    loadingGmvpWOSS
   ) {
-    return <Box display="flex" justifyContent="center" mt={4}>
-            <CircularProgress />
-          </Box>;
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   const aboveWSS = transformData(efficientFrontierDataWSS.above_gmpv);
@@ -180,37 +244,46 @@ const EfficientFrontierChart = () => {
   const individualFunds = transformFunds(funds);
 
   // Add a dataType marker to line data to distinguish from fund data
-  const markLineData = (data) => data.map(item => ({ ...item, dataType: "line" }));
-  
+  const markLineData = (data) =>
+    data.map((item) => ({ ...item, dataType: "line" }));
+
   const markedAboveWSS = markLineData(aboveWSS);
   const markedBelowWSS = markLineData(belowWSS);
   const markedAboveWOSS = markLineData(aboveWOSS);
   const markedBelowWOSS = markLineData(belowWOSS);
 
+  // console.log(gmvpWSS);
+  // console.log(gmvpWOSS);
+
   return (
-    <Box width="80%"
-    height="100%" 
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-    component={Paper}>
-      <Box
-        width="90%"
-        height="90%"
-        display="flex"
-        justifyContent="center"
-      >
+    <Box
+      width="80%"
+      height="100%"
+      component={Paper}
+      elevation={3} // stronger shadow
+      sx={{
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-2px) scale(1.0001)",
+          boxShadow: 5,
+        },
+      }}
+    >
+      <Box width="90%" height="90%" display="flex" justifyContent="center" margin={4}>
         <ResponsiveContainer>
-          <ComposedChart
-            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-          >
+          <ComposedChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <XAxis
               dataKey="risk"
               type="number"
               domain={[0, (dataMax) => Number((dataMax * 1.05).toFixed(2))]}
               tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
-              label={{ value: 'Risk (%)', position: 'insideBottom', offset: -10, fontSize: '1.2rem' }}
-              />
+              label={{
+                value: "Risk (%)",
+                position: "insideBottom",
+                offset: -10,
+                fontSize: "1.2rem",
+              }}
+            />
             <YAxis
               dataKey="return"
               type="number"
@@ -219,15 +292,21 @@ const EfficientFrontierChart = () => {
                 (dataMax) => Number((dataMax * 1.2).toFixed(2)),
               ]}
               tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
-              label={{ value: 'Return (%)', angle: -90, position: 'left', offset: 10, fontSize: '1.2rem' }}
+              label={{
+                value: "Return (%)",
+                angle: -90,
+                position: "left",
+                offset: 10,
+                fontSize: "1.2rem",
+              }}
             />
-            
+
             {/* Use custom tooltip that only responds to funds */}
-            <Tooltip 
-              content={<CustomTooltip classes={classes} />} 
-              cursor={{ strokeDasharray: '3 3' }}
+            <Tooltip
+              content={<CustomTooltip classes={classes} />}
+              cursor={{ strokeDasharray: "3 3" }}
             />
-            
+
             <Line
               name="Below frontier (With Short Sales)"
               type="monotone"
@@ -275,14 +354,40 @@ const EfficientFrontierChart = () => {
               activeDot={false}
               isAnimationActive={false}
             />
-            
-            <Scatter 
-              name="Individual Funds" 
-              data={individualFunds} 
+
+            <Scatter
+              name="Individual Funds"
+              data={individualFunds}
               shape={<CustomizedShape />}
               fill="#000000"
+              legendType="none"
             />
-            
+
+            <Scatter 
+              name="GMVP (Without Short Sales)"
+              dataKey="return"
+              data={[{
+                risk: gmvpWOSS["risk"] * 100,
+                return: gmvpWOSS["return"] * 100,
+                name: "GMVP (Without Short Sales)"
+              }]}
+              fill="#ff0000"
+              shape={<CustomSquare />}
+              legendType="square"
+            />
+
+            <Scatter 
+              name="GMVP (With Short Sales)"
+              dataKey="return"
+              data={[{
+                risk: gmvpWSS["risk"] * 100,
+                return: gmvpWSS["return"] * 100,
+                name: "GMVP (With Short Sales)"
+              }]}
+              fill="#8884d8"
+              shape={<CustomSquare />}
+              legendType="square"
+            />
             <Legend verticalAlign="bottom" wrapperStyle={{ bottom: 0 }} />
           </ComposedChart>
         </ResponsiveContainer>

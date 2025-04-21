@@ -28,11 +28,20 @@ fund_tickers = [
     "0P0000Y077.SI",
     "0P0000Y35A",
     "0P0000K7H9",
-    "0P0000TJCX",
+    "0P00006OI1.SI",
     "0P00000DS2",
     "0P000019D5",
     "0P00008SN2.F",
 ]
+
+fund_names = {}
+for ticker in fund_tickers:
+    try:
+        fund = yf.Ticker(ticker)
+        info = fund.info
+        fund_names[ticker] = info.get("longName", "Name not available")
+    except Exception as e:
+        fund_names[ticker] = f"Error: {str(e)}"
 
 # Download fund data from Yahoo Finance
 fund_data = yf.download(fund_tickers, period="3y", interval="1d")["Close"]
@@ -73,6 +82,8 @@ correlation_matrix = pd.DataFrame(returns, index=fund_tickers).T.corr()
 def efficient_frontier(short_sales=True):
     num_assets = len(avg_returns)
     result = []
+    weights_list = []
+
     for target_return in np.linspace(min(avg_returns), max(avg_returns), 50):
 
         def objective(weights):
@@ -82,9 +93,10 @@ def efficient_frontier(short_sales=True):
             {"type": "eq", "fun": lambda w: np.sum(w) - 1},
             {"type": "eq", "fun": lambda w: np.dot(w, avg_returns) - target_return},
         ]
-        # bounds = None if short_sales else [(0, 1)] * num_assets
+
         bounds = [(-1, 1)] * num_assets if short_sales else [(0, 1)] * num_assets
         init_guess = np.ones(num_assets) / num_assets
+
         opt = minimize(
             objective,
             init_guess,
@@ -96,31 +108,43 @@ def efficient_frontier(short_sales=True):
                 "xtol": 1e-9,
             },
         )
+
         if opt.success:
             result.append([target_return, opt.fun])
+            weights_list.append(opt.x)
+
     result = np.array(result) if result else np.array([]).reshape(0, 2)
+    weights_list = np.array(weights_list) if weights_list else np.array([]).reshape(0, num_assets)
 
     if result.size > 0:
         gmpv_index = np.argmin(result[:, 1])
 
-        # split
         above_gmpv = result[gmpv_index:]
         below_gmpv = result[: gmpv_index + 1]
         gmvp_point = result[gmpv_index]
+        gmvp_weights = weights_list[gmpv_index]
 
-        return above_gmpv, below_gmpv, gmvp_point
+        return above_gmpv, below_gmpv, gmvp_point, gmvp_weights
     else:
-        return np.array([]).reshape(0, 2), np.array([]).reshape(0, 2)
+        return (
+            np.array([]).reshape(0, 2),
+            np.array([]).reshape(0, 2),
+            np.array([]),
+            np.array([]),
+        )
+
+
     
 @app.route("/gmvp", methods=["GET"])  # ?short_sales=true/false
 def get_gmvp_point():
     short_sales = request.args.get("short_sales", "true").lower() == "true"
-    _, _, gmvp_point = efficient_frontier(short_sales=short_sales)
-
+    _, _, gmvp_point, gmvp_weights = efficient_frontier(short_sales=short_sales)
+    weights = gmvp_weights.tolist()
     if gmvp_point.size > 0:
         res = jsonify({
-            "expected_return": gmvp_point[0],
-            "volatility": gmvp_point[1]
+            "risk": gmvp_point[1],
+            "return": gmvp_point[0],
+            "weights": [{"name": fund_names[ticker], "value": weights[i]} for i, ticker in enumerate(fund_tickers)]
         })
     else:
         res = jsonify({"error": "GMVP not found"})
@@ -137,7 +161,7 @@ def get_gmvp_point():
 @app.route("/efficient_frontier", methods=["GET"])  # ?short_sales=true/false
 def get_efficient_frontier():
     short_sales = request.args.get("short_sales", "true").lower() == "true"
-    above_gmpv, below_gmpv = efficient_frontier(short_sales=short_sales)
+    above_gmpv, below_gmpv, _, _ = efficient_frontier(short_sales=short_sales)
     # res = jsonify({"efficient_frontier": frontier.tolist()})
     res = jsonify(
         {"above_gmpv": above_gmpv.tolist(), "below_gmpv": below_gmpv.tolist()}
@@ -186,7 +210,8 @@ def get_fund_statistics():
     for i, ticker in enumerate(fund_tickers):
         fund_info = yf.Ticker(ticker).info
         statistics.append(
-            {
+            {   
+                "fund_ticker": fund_tickers[i],
                 "fund_name": fund_info.get("longName", ticker),
                 "fund_description": fund_info.get(
                     "longBusinessSummary", "No description available"

@@ -30,21 +30,18 @@ function PortfolioBarChart({
   data,
   width = 500,
   height = 600,
+  barheight = 250,
   title = "Recommended Portfolio Allocation",
 }) {
+    console.log(data);
+    
   return (
-    <Box
-      sx={{
-        textAlign: "center",
-        p: 2,
-        border: "1px solid grey",
-        borderRadius: 1,
-      }}
+    <Box>
 
-      height={650}
-    >
       <Typography variant="h6" gutterBottom>
-        {title}
+        <Box display={"flex"} justifyContent={"center"}>
+          {title}
+        </Box>
       </Typography>
       <BarChart
         width={width}
@@ -58,10 +55,10 @@ function PortfolioBarChart({
         />
         <XAxis
           dataKey="name"
-          angle={-60}
+          angle={-80}
           textAnchor="end"
           interval={0}
-          height={250}
+          height={barheight}
         />
         <Tooltip
           formatter={(value) => `${value.toFixed(2)}%`}

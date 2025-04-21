@@ -73,14 +73,14 @@ useEffect(() => {
         style: { fontSize: "10px" },
       },
     },
-    title: {
-      text: "Correlation Matrix",
-      align: "center",
-      style: {
-        fontSize: "18px",
-        fontWeight: "bold",
-      },
-    },
+    // title: {
+    //   text: "Correlation Matrix",
+    //   align: "center",
+    //   style: {
+    //     fontSize: "18px",
+    //     fontWeight: "bold",
+    //   },
+    // },
   };
 
   return (

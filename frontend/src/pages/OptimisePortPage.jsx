@@ -4,29 +4,36 @@ import PortfolioPieChart from "../components/PortfolioPieChart";
 import PortfolioBarChart from "../components/PortfolioBarChart";
 import ScoreProgress from "../components/ScoreProgress";
 import PortfolioPerformanceChart from "../components/PortfolioPerformanceChart";
-import { Box, Button, Grid, Paper, Stack, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  Grid,
+  Paper,
+  Stack,
+  CircularProgress,
+} from "@mui/material";
 import InvestmentBotPrompt from "../components/OptimiseLanding";
 import axios from "axios";
 
 function dataToleranceMap(score) {
-  if (score < 0 || score > 100 || typeof score !== 'number') {
-      return 'Invalid score';
+  if (score < 0 || score > 100 || typeof score !== "number") {
+    return "Invalid score";
   }
 
   if (score >= 0 && score <= 25) {
-      return 'Very cautious';
+    return "Very cautious";
   } else if (score >= 26 && score <= 33) {
-      return 'Cautious';
+    return "Cautious";
   } else if (score >= 34 && score <= 44) {
-      return 'Moderately cautious';
+    return "Moderately cautious";
   } else if (score >= 45 && score <= 56) {
-      return 'Balanced';
+    return "Balanced";
   } else if (score >= 57 && score <= 67) {
-      return 'Moderately aggressive';
+    return "Moderately aggressive";
   } else if (score >= 68 && score <= 79) {
-      return 'Aggressive';
+    return "Aggressive";
   } else if (score >= 80 && score <= 100) {
-      return 'Very aggressive';
+    return "Very aggressive";
   }
 }
 
@@ -72,7 +79,9 @@ function OptimisePortPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: "100%", overflow: "hidden" }}>
+    <Box
+      sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: "100%", overflow: "hidden" }}
+    >
       <Grid container spacing={2} sx={{ width: "100%" }}>
         {/* Left column */}
         <Grid item xs={12} md={4}>
@@ -82,42 +91,52 @@ function OptimisePortPage() {
               <ScoreProgress
                 score={questionnaireData}
                 styleLabel={dataToleranceMap(questionnaireData)}
-                sx={{ height: "100%" }} 
+                sx={{ height: "100%" }}
               />
             </Paper>
-            
+
             {/* Portfolio bar chart - flexible height */}
-            <Paper 
-              elevation={2} 
-              sx={{ 
-                p: 2, 
-                borderRadius: 2, 
+            <Paper
+              elevation={2}
+              sx={{
+                p: 2,
+                borderRadius: 2,
                 flex: 1,
                 display: "flex",
-                flexDirection: "column"
+                flexDirection: "column",
               }}
             >
-              <PortfolioBarChart data={portfolioData} />
+              <Box
+                sx={{
+                  textAlign: "center",
+                  p: 2,
+                  border: "1px solid grey",
+                  borderRadius: 1,
+                }}
+                height={650}
+              >
+                <PortfolioBarChart data={portfolioData} />
+              </Box>
             </Paper>
           </Stack>
         </Grid>
-        
+
         {/* Right column - chart and button */}
         <Grid item xs={12} md={8}>
           <Stack spacing={2} sx={{ height: "100%" }}>
-            <Paper 
-              elevation={2} 
-              sx={{ 
-                p: 2, 
-                borderRadius: 2, 
+            <Paper
+              elevation={2}
+              sx={{
+                p: 2,
+                borderRadius: 2,
                 flex: 1,
                 display: "flex",
-                flexDirection: "column"
+                flexDirection: "column",
               }}
             >
               <PortfolioPerformanceChart riskAversion={questionnaireData} />
             </Paper>
-            
+
             <Button
               variant="contained"
               fullWidth
