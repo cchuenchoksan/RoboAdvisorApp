@@ -4,23 +4,9 @@ import PortfolioPieChart from "../components/PortfolioPieChart";
 import PortfolioBarChart from "../components/PortfolioBarChart";
 import ScoreProgress from "../components/ScoreProgress";
 import PortfolioPerformanceChart from "../components/PortfolioPerformanceChart";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import { Box, Button, Grid, Paper, Stack, CircularProgress } from '@mui/material';
 import InvestmentBotPrompt from "../components/OptimiseLanding";
 import axios from "axios";
-import CircularProgress from "@mui/material/CircularProgress";
-
-// // TODO: Fake Data: performance of optimal portfolio in last 30 days
-// const performanceData = [
-//   { day: "Day 1", value: 1000 },
-//   { day: "Day 5", value: 1020 },
-//   { day: "Day 10", value: 1010 },
-//   { day: "Day 15", value: 1050 },
-//   { day: "Day 20", value: 1080 },
-//   { day: "Day 25", value: 1070 },
-//   { day: "Day 30", value: 1100 },
-// ];
-
 
 function dataToleranceMap(score) {
   if (score < 0 || score > 100 || typeof score !== 'number') {
@@ -47,11 +33,11 @@ function dataToleranceMap(score) {
 function OptimisePortPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [riskAversion, setRiskAversion] = useState(0.5);
   const [portfolioData, setPortfolioData] = useState(null);
 
-  // get data from questionnare
+  // Get data from questionnaire
   const questionnaireData = location.state?.questionnaireData || null;
+  const [riskAversion, setRiskAversion] = useState(questionnaireData);
 
   const handleButtonClick = () => {
     navigate("/QuestionnairePage");
@@ -68,7 +54,6 @@ function OptimisePortPage() {
           "http://127.0.0.1:5000/ratio_breakdown_api?risk_aversion=" +
             questionnaireData
         );
-
         setPortfolioData(res.data);
       } catch (err) {
         console.error("Error fetching ratio breakdown:", err);
@@ -76,7 +61,7 @@ function OptimisePortPage() {
     };
 
     fetchData();
-  }, []);
+  }, [questionnaireData]);
 
   if (portfolioData === null) {
     return (
@@ -86,58 +71,64 @@ function OptimisePortPage() {
     );
   }
 
-  questionnaireData
-
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", gap: 3 }}>
-        {/* 左边：得分和饼图 */}
-        <Box
-          sx={{
-            flex: "1 1 30%",
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-          }}
-        >
-          <ScoreProgress
-            score={questionnaireData}
-            styleLabel={dataToleranceMap(questionnaireData)}
-          />
-
-          <PortfolioBarChart data={portfolioData} />
-
-          {/* 重新测试按钮 */}
-          <Button
-            variant="contained"
-            onClick={() => navigate("/QuestionnairePage")}
-            sx={{ mt: 2 }}
-          >
-            Take Test Again
-          </Button>
-        </Box>
-
-        {/* 右边：折线图 */}
-        {/* <Box sx={{ flex: "1 1 70%", p: 2, border: "1px solid grey", borderRadius: 1 }}>
-            <Typography variant="h6" gutterBottom>
-              Portfolio Performance (Past 30 Days)
-            </Typography>
-            <LineChart
-              width={900}
-              height={600}
-              data={performanceData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+    <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: "100%", overflow: "hidden" }}>
+      <Grid container spacing={2} sx={{ width: "100%" }}>
+        {/* Left column */}
+        <Grid item xs={12} md={4}>
+          <Stack spacing={2} sx={{ height: "100%" }}>
+            {/* ScoreProgress card with reduced height */}
+            <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+              <ScoreProgress
+                score={questionnaireData}
+                styleLabel={dataToleranceMap(questionnaireData)}
+                sx={{ height: "100%" }} 
+              />
+            </Paper>
+            
+            {/* Portfolio bar chart - flexible height */}
+            <Paper 
+              elevation={2} 
+              sx={{ 
+                p: 2, 
+                borderRadius: 2, 
+                flex: 1,
+                display: "flex",
+                flexDirection: "column"
+              }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <LineTooltip />
-              <LineLegend />
-              <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
-            </LineChart>
-          </Box> */}
-        <PortfolioPerformanceChart riskAversion={riskAversion} />
-      </Box>
+              <PortfolioBarChart data={portfolioData} />
+            </Paper>
+          </Stack>
+        </Grid>
+        
+        {/* Right column - chart and button */}
+        <Grid item xs={12} md={8}>
+          <Stack spacing={2} sx={{ height: "100%" }}>
+            <Paper 
+              elevation={2} 
+              sx={{ 
+                p: 2, 
+                borderRadius: 2, 
+                flex: 1,
+                display: "flex",
+                flexDirection: "column"
+              }}
+            >
+              <PortfolioPerformanceChart riskAversion={questionnaireData} />
+            </Paper>
+            
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => navigate("/QuestionnairePage")}
+              sx={{ height: 48 }}
+            >
+              Take Test Again
+            </Button>
+          </Stack>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

@@ -131,14 +131,16 @@ def get_efficient_frontier():
 def portfolio_performance():
     """API to get the performance of the optimal portfolio over the last 30 days."""
     data = request.get_json()
-    risk_aversion = data.get('risk_aversion')
+    risk_profile = data.get('risk_aversion')
     period = data.get('period', 30)  # Default to 30 days if not provided
     period  = min(period, 252*2)  # Limit to max 2 years
 
+    risk_aversion = profile_to_risk_aversion(risk_profile)
+
+    print(f"Risk Profile:{risk_profile},Risk aversion: {risk_aversion}, Period: {period}")
     if risk_aversion is None:
         return jsonify({"error": "No risk profile found"}), 400
 
-    
     short_sales = risk_aversion >= 1e-6
 
     # Calculate optimal portfolio weights

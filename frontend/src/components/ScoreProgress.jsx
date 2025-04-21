@@ -4,8 +4,18 @@ import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
 
 function ScoreProgress({ score, maxScore = 100, styleLabel = "Moderate" }) {
-  // 计算进度百分比
   const progress = (score / maxScore) * 100;
+  const styleColorMap = {
+    "Very cautious": "#1976d2",
+    "Cautious": "#2196f3",
+    "Moderately cautious": "#4caf50",
+    "Balanced": "#ffb300",
+    "Moderately aggressive": "#ff7043",
+    "Aggressive": "#f44336",
+    "Very aggressive": "#d32f2f",
+  };
+
+  const barColor = styleColorMap[styleLabel] || "#4caf50";
 
   return (
     <Box sx={{ p: 2, border: "1px solid grey", borderRadius: 1 }}>
@@ -13,13 +23,11 @@ function ScoreProgress({ score, maxScore = 100, styleLabel = "Moderate" }) {
         Your Investment Preferences
       </Typography>
 
-      {/* 用户得分 */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="body1" gutterBottom textAlign="center">
           <strong>Your Score:</strong> {score}/{maxScore} ({styleLabel})
         </Typography>
         <Box sx={{ position: "relative" }}>
-          {/* 进度条 */}
           <LinearProgress
             variant="determinate"
             value={progress}
@@ -28,11 +36,10 @@ function ScoreProgress({ score, maxScore = 100, styleLabel = "Moderate" }) {
               borderRadius: 5,
               backgroundColor: "#e0e0e0",
               "& .MuiLinearProgress-bar": {
-                backgroundColor: "#4caf50", // 绿色表示用户得分
+                backgroundColor: barColor,
               },
             }}
           />
-          {/* 两端的标签 */}
           <Box
             sx={{
               display: "flex",
@@ -41,10 +48,10 @@ function ScoreProgress({ score, maxScore = 100, styleLabel = "Moderate" }) {
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              Conservative
+              Very cautious
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Aggressive
+              Very aggressive
             </Typography>
           </Box>
         </Box>
