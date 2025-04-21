@@ -18,7 +18,7 @@ const ExploreFundsPage = () => {
         </Box>
       </Box>
 
-      <Box display={"flex"} justifyContent={"center"} height={"45vh"}>
+      <Box display={"flex"} justifyContent={"center"} height={"50vh"}>
         <EfficientFrontierChart />
       </Box>
 

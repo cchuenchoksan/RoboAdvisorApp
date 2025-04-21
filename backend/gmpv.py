@@ -37,6 +37,7 @@ fund_tickers = [
 # Download fund data from Yahoo Finance
 fund_data = yf.download(fund_tickers, period="3y", interval="1d")["Close"]
 fund_data = fund_data.interpolate()
+fund_data = fund_data[fund_tickers]
 
 # Compute daily returns
 returns = fund_data.pct_change().dropna().T.values
