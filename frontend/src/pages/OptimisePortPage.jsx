@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import PortfolioPieChart from "../components/PortfolioPieChart";
 import PortfolioBarChart from "../components/PortfolioBarChart";
 import ScoreProgress from "../components/ScoreProgress";
 import PortfolioPerformanceChart from "../components/PortfolioPerformanceChart";
@@ -11,9 +10,19 @@ import {
   Paper,
   Stack,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import InvestmentBotPrompt from "../components/OptimiseLanding";
 import axios from "axios";
+
+// Color palette
+const colorPalette = {
+  prussianBlue: "#212D40",
+  charcoal: "#364156",
+  platinum: "#DBDBDB",
+  jasper: "#D66853",
+  roseTaupe: "#7D4E57",
+};
 
 function dataToleranceMap(score) {
   if (score < 0 || score > 100 || typeof score !== "number") {
@@ -72,22 +81,67 @@ function OptimisePortPage() {
 
   if (portfolioData === null) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        mt={4}
+        height="70vh"
+      >
+        <CircularProgress sx={{ color: colorPalette.jasper }} />
+        <Typography sx={{ mt: 2, color: colorPalette.charcoal }}>
+          Building your personalized portfolio...
+        </Typography>
       </Box>
     );
   }
 
   return (
     <Box
-      sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: "100%", overflow: "hidden" }}
+      sx={{
+        p: { xs: 2, sm: 3, md: 4 },
+        maxWidth: "100%",
+        overflow: "hidden",
+        backgroundColor: "#fafafa",
+        minHeight: "90vh",
+      }}
     >
-      <Grid container spacing={2} sx={{ width: "100%" }}>
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 3,
+          textAlign: "center",
+          color: colorPalette.prussianBlue,
+          fontWeight: 600,
+        }}
+      >
+        Your Personalized Portfolio
+      </Typography>
+
+      <Grid container spacing={3} sx={{ width: "100%" }}>
         {/* Left column */}
-        <Grid item xs={12} md={4}>
-          <Stack spacing={2} sx={{ height: "100%" }}>
+        <Grid item xs={12} md={5}>
+          <Stack spacing={3} sx={{ height: "100%" }}>
             {/* ScoreProgress card with reduced height */}
-            <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+            <Paper
+              elevation={2}
+              sx={{
+                p: 3,
+                borderRadius: 2,
+                border: `1px solid ${colorPalette.platinum}`,
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  color: colorPalette.prussianBlue,
+                  fontWeight: 600,
+                }}
+              >
+                Your Risk Profile
+              </Typography>
               <ScoreProgress
                 score={questionnaireData}
                 styleLabel={dataToleranceMap(questionnaireData)}
@@ -99,21 +153,33 @@ function OptimisePortPage() {
             <Paper
               elevation={2}
               sx={{
-                p: 2,
+                p: 3,
                 borderRadius: 2,
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
+                border: `1px solid ${colorPalette.platinum}`,
               }}
             >
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  color: colorPalette.prussianBlue,
+                  fontWeight: 600,
+                }}
+              >
+                Portfolio Allocation
+              </Typography>
               <Box
                 sx={{
                   textAlign: "center",
-                  p: 2,
-                  border: "1px solid grey",
                   borderRadius: 1,
+                  flex: 1,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-                height={650}
               >
                 <PortfolioBarChart data={portfolioData} />
               </Box>
@@ -122,18 +188,27 @@ function OptimisePortPage() {
         </Grid>
 
         {/* Right column - chart and button */}
-        <Grid item xs={12} md={8}>
-          <Stack spacing={2} sx={{ height: "100%" }}>
+        <Grid item xs={12} md={7}>
+          <Stack spacing={3} sx={{ height: "100%" }}>
             <Paper
               elevation={2}
               sx={{
-                p: 2,
+                p: 3,
                 borderRadius: 2,
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
+                border: `1px solid ${colorPalette.platinum}`,
               }}
             >
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  color: colorPalette.prussianBlue,
+                  fontWeight: 600,
+                  mb: 2,
+                }}
+              >
+                Recommended Portfolio Performance in Past 90 Days
+              </Typography>
               <PortfolioPerformanceChart riskAversion={questionnaireData} />
             </Paper>
 
@@ -141,7 +216,19 @@ function OptimisePortPage() {
               variant="contained"
               fullWidth
               onClick={() => navigate("/QuestionnairePage")}
-              sx={{ height: 48 }}
+              sx={{
+                height: 50,
+                backgroundColor: colorPalette.jasper,
+                color: "#FFFFFF",
+                fontWeight: 600,
+                fontSize: "1rem",
+                textTransform: "none",
+                borderRadius: "6px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                "&:hover": {
+                  backgroundColor: colorPalette.roseTaupe,
+                },
+              }}
             >
               Take Test Again
             </Button>

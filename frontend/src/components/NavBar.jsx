@@ -10,14 +10,24 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { Link } from 'react-router-dom';
 
-import './NavBar.css';  // Import the CSS file
+import './NavBar.css';
 
-const pages = [{route: 'HomePage', name: 'Home'},
-                {route: 'ExploreFundsPage', name: 'Explore Funds'},
-                {route: 'OptimisePortPage', name: 'Optimise Port'}
-              ];
+// Color palette
+const colorPalette = {
+  prussianBlue: '#212D40',
+  charcoal: '#364156',
+  platinum: '#DBDBDB',
+  jasper: '#D66853',
+  roseTaupe: '#7D4E57'
+};
+
+const pages = [
+  {route: 'HomePage', name: 'Home'},
+  {route: 'ExploreFundsPage', name: 'Explore Funds'},
+  {route: 'OptimisePortPage', name: 'Optimise Port'}
+];
 
 function NavBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -30,10 +40,23 @@ function NavBar() {
   };
 
   return (
-    <AppBar position="static" className="ipok-nav-bar">
+    <AppBar 
+      position="static" 
+      className="ipok-nav-bar"
+      sx={{ 
+        backgroundColor: colorPalette.prussianBlue,
+        boxShadow: `0 2px 4px rgba(0,0,0,0.1)`
+      }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          <AdbIcon 
+            sx={{ 
+              display: { xs: 'none', md: 'flex' }, 
+              mr: 1,
+              color: 'white'
+            }} 
+          />
           <Typography
             variant="h6"
             noWrap
@@ -45,7 +68,7 @@ function NavBar() {
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'white',
               textDecoration: 'none',
             }}
           >
@@ -59,7 +82,7 @@ function NavBar() {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color="inherit"
+              sx={{ color: 'white' }}
             >
               <MenuIcon />
             </IconButton>
@@ -77,12 +100,24 @@ function NavBar() {
               }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
-              sx={{ display: { xs: 'block', md: 'none' } }}
+              sx={{ 
+                display: { xs: 'block', md: 'none' },
+                '& .MuiPaper-root': {
+                  backgroundColor: colorPalette.charcoal,
+                }
+              }}
             >
               {pages.map((page) => (
-                <MenuItem key={page.route} onClick={handleCloseNavMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>
-                    {/* Wrap menu items with Link for navigation */}
+                <MenuItem 
+                  key={page.route} 
+                  onClick={handleCloseNavMenu}
+                  sx={{ 
+                    '&:hover': {
+                      backgroundColor: colorPalette.roseTaupe,
+                    }
+                  }}
+                >
+                  <Typography sx={{ textAlign: 'center', color: 'white' }}>
                     <Link to={`/${page.route.toLowerCase()}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                       {page.name}
                     </Link>
@@ -91,7 +126,7 @@ function NavBar() {
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, color: 'white' }} />
           <Typography
             variant="h5"
             noWrap
@@ -104,7 +139,7 @@ function NavBar() {
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'white',
               textDecoration: 'none',
             }}
           >
@@ -115,9 +150,16 @@ function NavBar() {
               <Button
                 key={page.route}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ 
+                  my: 2, 
+                  color: 'white', 
+                  display: 'block',
+                  '&:hover': {
+                    backgroundColor: colorPalette.jasper,
+                    transition: 'background-color 0.3s ease'
+                  }
+                }}
               >
-                {/* Wrap Button with Link for navigation */}
                 <Link to={`/${page.route.toLowerCase()}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   {page.name}
                 </Link>

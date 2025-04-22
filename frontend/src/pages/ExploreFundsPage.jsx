@@ -3,11 +3,21 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 
 import EfficientFrontierChart from "../components/EfficientFrontier";
 import FundsTable from "../components/FundsTable";
 import CorrelationMatrix from "../components/heatmap";
 import PortfolioBarChart from "../components/PortfolioBarChart";
+
+// Color palette
+const colorPalette = {
+  prussianBlue: '#212D40',
+  charcoal: '#364156',
+  platinum: '#DBDBDB',
+  jasper: '#D66853',
+  roseTaupe: '#7D4E57'
+};
 
 const ExploreFundsPage = () => {
   const [gmvpWSS, setGmvpWSS] = useState(null);
@@ -63,50 +73,55 @@ const ExploreFundsPage = () => {
     fetchGmvpWOSS();
   }, []);
 
-  return (
-    <Box>
-      <Box display={"flex"} justifyContent={"center"} marginTop={"3vh"} marginBottom={"1vh"}>
-        <Box
-          display={"flex"}
-          justifyContent={"center"}
-          sx={{ fontFamily: "sans-serif", fontSize: "1.5rem", width: "100%" }}
-        >
-          <Typography variant="h4">Efficient Frontier</Typography>
-        </Box>
-      </Box>
+  const SectionTitle = ({ children }) => (
+    <Box 
+      display="flex" 
+      justifyContent="center" 
+      alignItems="center" 
+      sx={{ width: "100%", pt: 7, mb: 3 }}
+    >
+      <Divider sx={{ flex: 1, maxWidth: "200px", borderColor: colorPalette.platinum }} />
+      <Typography 
+        variant="h4" 
+        sx={{
+          fontFamily: "sans-serif",
+          fontWeight: 600,
+          color: colorPalette.prussianBlue,
+          px: 4,
+        }}
+      >
+        {children}
+      </Typography>
+      <Divider sx={{ flex: 1, maxWidth: "200px", borderColor: colorPalette.platinum }} />
+    </Box>
+  );
 
-      <Box display={"flex"} justifyContent={"center"} height={"50vh"}>
+  return (
+    <Box sx={{ backgroundColor: "#fafafa", minHeight: "100vh", pb: 8 }}>
+      <SectionTitle>Efficient Frontier</SectionTitle>
+
+      <Box display="flex" justifyContent="center" height="80vh">
         <EfficientFrontierChart />
       </Box>
 
-      <Box display={"flex"} justifyContent={"center"} marginTop={"7vh"}>
-        <Box
-          display={"flex"}
-          justifyContent={"center"}
-          sx={{ fontFamily: "sans-serif", fontSize: "1.5rem", width: "100%" }}
-        >
-          <Typography variant="h4">
-            Global Minimum Variance Portfolios
-          </Typography>
-        </Box>
-      </Box>
-      <Box marginY={2} display={"flex"} justifyContent={"center"}>
-        {!loadingGmvpWSS | !loadingGmvpWSS ? (
+      <SectionTitle>Global Minimum Variance Portfolios</SectionTitle>
+      
+      <Box marginY={2} display="flex" justifyContent="center">
+        {!loadingGmvpWSS && !loadingGmvpWOSS ? (
           <Box
-            width="80%"
-            height="100%"
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
+            width="85%"
             component={Paper}
-            padding={4}
-            elevation={3} // stronger shadow
+            elevation={2}
             sx={{
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-2px) scale(1.0001)",
-                boxShadow: 5,
-              },
+              padding: 4,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center", 
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 4,
+              borderRadius: "8px",
+              backgroundColor: "#FFFFFF",
+              border: `1px solid ${colorPalette.platinum}`,
             }}
           >
             <PortfolioBarChart
@@ -114,54 +129,45 @@ const ExploreFundsPage = () => {
               title="Without Short Sales"
               height={700}
               barheight={350}
+              margin={2}
             />
             <PortfolioBarChart
               data={gmvpWSS}
               title="With Short Sales"
               height={700}
               barheight={350}
+              margin={2}
             />
           </Box>
         ) : (
-          <CircularProgress />
+          <Box display="flex" flexDirection="column" alignItems="center" my={6}>
+            <CircularProgress sx={{ color: colorPalette.jasper }} />
+            <Typography sx={{ mt: 2, color: colorPalette.charcoal }}>
+              Loading portfolio data...
+            </Typography>
+          </Box>
         )}
       </Box>
 
-      <Box display={"flex"} justifyContent={"center"} marginTop={"7vh"}>
-        <Box
-          display={"flex"}
-          justifyContent={"center"}
-          sx={{ fontFamily: "sans-serif", fontSize: "1.5rem", width: "100%" }}
-        >
-          <Typography variant="h4">Funds Breakdown</Typography>
-        </Box>
-      </Box>
-      <Box display={"flex"} justifyContent={"center"}>
-        <Box width={"90vw"}>
+      <SectionTitle>Funds Breakdown</SectionTitle>
+      
+      <Box display="flex" justifyContent="center">
+        <Box width="90%">
           <FundsTable />
         </Box>
       </Box>
-      <Box display={"flex"} justifyContent={"center"} marginTop={"7vh"} marginBottom={"2vh"}>
+      
+      <SectionTitle>Correlation Matrix</SectionTitle>
+      
+      <Box display="flex" justifyContent="center" alignItems="center" mb={8}>
         <Box
-          display={"flex"}
-          justifyContent={"center"}
-          sx={{ fontFamily: "sans-serif", fontSize: "1.5rem", width: "100%" }}
-        >
-          <Typography variant="h4">Correlation Matrix</Typography>
-        </Box>
-      </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <Box
-          height={"100%"}
-          width={"80%"}
+          width="85%"
           component={Paper}
-          elevation={3} // stronger shadow
+          elevation={2}
           sx={{
-            transition: "transform 0.3s ease, box-shadow 0.3s ease",
-            "&:hover": {
-              transform: "translateY(-2px) scale(1.0001)",
-              boxShadow: 5,
-            },
+            borderRadius: "8px",
+            overflow: "hidden",
+            border: `1px solid ${colorPalette.platinum}`,
           }}
         >
           <CorrelationMatrix />

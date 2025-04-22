@@ -12,6 +12,15 @@ import {
   Typography,
 } from "@mui/material";
 
+// Color palette
+const colorPalette = {
+  prussianBlue: '#212D40',
+  charcoal: '#364156',
+  platinum: '#DBDBDB',
+  jasper: '#D66853',
+  roseTaupe: '#7D4E57'
+};
+
 const API_URL = "http://127.0.0.1:5000/fund_statistics";
 
 function formatPercentage(value) {
@@ -41,8 +50,11 @@ export default function FundStatisticsTable() {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={4}>
+        <CircularProgress sx={{ color: colorPalette.jasper }} />
+        <Typography sx={{ mt: 2, color: colorPalette.charcoal }}>
+          Loading fund data...
+        </Typography>
       </Box>
     );
   }
@@ -50,64 +62,91 @@ export default function FundStatisticsTable() {
   if (error) {
     return (
       <Box display="flex" justifyContent="center" mt={4}>
-        <Typography color="error">{error}</Typography>
+        <Typography sx={{ color: colorPalette.jasper, fontWeight: 500 }}>
+          {error}
+        </Typography>
       </Box>
     );
   }
 
   return (
-    <Box mt={4}>
+    <Box mt={4} display="flex" justifyContent="center">
       <TableContainer
-        width="80%"
-        height="100%"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
         component={Paper}
-        padding={4}
-        elevation={3} // stronger shadow
+        elevation={2}
         sx={{
-          transition: "transform 0.3s ease, box-shadow 0.3s ease",
-          "&:hover": {
-            transform: "translateY(-2px) scale(1.0001)",
-            boxShadow: 5,
-          },
+          width: "90%",
+          maxWidth: 1200,
+          backgroundColor: "#FFFFFF",
+          borderRadius: "8px",
+          overflow: "hidden",
+          border: `1px solid ${colorPalette.platinum}`,
         }}
       >
+        {/* <Box p={3} bgcolor={colorPalette.prussianBlue}>
+          <Typography variant="h6" sx={{ color: "#FFFFFF", fontWeight: 500 }}>
+            Fund Statistics
+          </Typography>
+        </Box> */}
+        
         <Table sx={{ minWidth: 650 }} aria-label="funds table">
-          <TableHead>
+          <TableHead sx={{ backgroundColor: colorPalette.platinum }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>Ticker</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Fund Name</TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+              <TableCell sx={{ fontWeight: "bold", color: colorPalette.prussianBlue }}>
+                Ticker
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: colorPalette.prussianBlue }}>
+                Fund Name
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: colorPalette.prussianBlue }}>
                 Description
               </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+              <TableCell align="right" sx={{ fontWeight: "bold", color: colorPalette.prussianBlue }}>
                 Avg Returns (%)
               </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+              <TableCell align="right" sx={{ fontWeight: "bold", color: colorPalette.prussianBlue }}>
                 Risk (std %)
               </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+              <TableCell align="right" sx={{ fontWeight: "bold", color: colorPalette.prussianBlue }}>
                 Sharpe Ratio
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {funds.map((fund) => (
-              <TableRow key={fund.fund_name}>
-                <TableCell>{fund.fund_ticker}</TableCell>
-                <TableCell component="th" scope="row">
+            {funds.map((fund, index) => (
+              <TableRow 
+                key={fund.fund_name}
+                sx={{ 
+                  '&:nth-of-type(odd)': { 
+                    backgroundColor: 'rgba(219, 219, 219, 0.1)' 
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(214, 104, 83, 0.05)'
+                  }
+                }}
+              >
+                <TableCell sx={{ color: colorPalette.charcoal, fontWeight: 500 }}>
+                  {fund.fund_ticker}
+                </TableCell>
+                <TableCell component="th" scope="row" sx={{ color: colorPalette.prussianBlue }}>
                   {fund.fund_name}
                 </TableCell>
-                <TableCell align="right">{fund.fund_description}</TableCell>
-                <TableCell align="right">
+                <TableCell sx={{ color: colorPalette.charcoal }}>
+                  {fund.fund_description}
+                </TableCell>
+                <TableCell align="right" sx={{ 
+                  color: fund.fund_returns > 0 ? '#2e7d32' : '#d32f2f',
+                  fontWeight: 500
+                }}>
                   {formatPercentage(fund.fund_returns)}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ color: colorPalette.charcoal }}>
                   {formatPercentage(fund.fund_risk)}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ 
+                  color: fund.fund_sharpe > 0 ? '#2e7d32' : '#d32f2f',
+                  fontWeight: 500
+                }}>
                   {fund.fund_sharpe.toFixed(4)}
                 </TableCell>
               </TableRow>

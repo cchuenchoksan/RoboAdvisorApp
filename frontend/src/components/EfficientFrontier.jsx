@@ -13,25 +13,58 @@ import {
   ComposedChart,
 } from "recharts";
 import { makeStyles } from "@mui/styles";
-import { Box, Paper, CircularProgress } from "@mui/material";
+import { Box, Paper, CircularProgress, Typography } from "@mui/material";
 
-const useStyles = makeStyles((theme) => ({
+// Color palette
+const colorPalette = {
+  prussianBlue: '#212D40',
+  charcoal: '#364156',
+  platinum: '#DBDBDB',
+  jasper: '#D66853',
+  roseTaupe: '#7D4E57'
+};
+
+const useStyles = makeStyles(() => ({
   ipokLineContainer: {
     width: "45vw !important",
   },
   ipokContainer: {
     margin: "1rem !important",
+    backgroundColor: "#FFFFFF",
   },
   customTooltip: {
     backgroundColor: "rgba(255, 255, 255, 0.95)",
-    border: "1px solid #ccc",
-    padding: "10px",
+    border: `1px solid ${colorPalette.platinum}`,
+    padding: "12px",
     borderRadius: "4px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-    fontSize: "12px",
+    boxShadow: "0 3px 10px rgba(0, 0, 0, 0.15)",
+    fontSize: "13px",
+    fontFamily: "'Roboto', sans-serif",
   },
+  chartTitle: {
+    color: colorPalette.prussianBlue,
+    fontWeight: 600,
+    marginBottom: "1rem",
+    textAlign: "center",
+    fontFamily: "'Roboto', sans-serif",
+  },
+  loadingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "400px",
+    backgroundColor: colorPalette.platinum,
+    borderRadius: "8px",
+  },
+  loadingText: {
+    marginTop: "1rem",
+    color: colorPalette.charcoal,
+    fontFamily: "'Roboto', sans-serif",
+  }
 }));
 
+// Don't change the individual asset colors as specified
 const COLORS = [
   "#0088FE", // blue
   "#00C49F", // teal
@@ -47,7 +80,6 @@ const COLORS = [
 
 const transformData = (arr) =>
   arr
-    //   .filter(([y, x]) => x *100 <= 0.2) // Filter elements where x <= 0.2
     .map(([y, x]) => ({ risk: x * 100, return: y * 100 }));
 
 const transformFunds = (arr) =>
@@ -80,14 +112,14 @@ const CustomTooltip = (props) => {
     if (fundPayload) {
       return (
         <div className={props.classes.customTooltip}>
-          <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
+          <p style={{ margin: "0 0 8px 0", fontWeight: "bold", color: colorPalette.prussianBlue }}>
             {fundPayload.payload.name}
           </p>
-          <p style={{ margin: "2px 0" }}>
-            Risk: {fundPayload.payload.risk.toFixed(2)}%
+          <p style={{ margin: "3px 0", color: colorPalette.charcoal }}>
+            Risk: <span style={{ fontWeight: "500" }}>{fundPayload.payload.risk.toFixed(2)}%</span>
           </p>
-          <p style={{ margin: "2px 0" }}>
-            Return: {fundPayload.payload.return.toFixed(2)}%
+          <p style={{ margin: "3px 0", color: colorPalette.charcoal }}>
+            Return: <span style={{ fontWeight: "500" }}>{fundPayload.payload.return.toFixed(2)}%</span>
           </p>
         </div>
       );
@@ -229,8 +261,11 @@ const EfficientFrontierChart = () => {
     loadingGmvpWOSS
   ) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
+      <Box className={classes.loadingContainer}>
+        <CircularProgress sx={{ color: colorPalette.jasper }} size={60} thickness={4} />
+        <Typography variant="body1" className={classes.loadingText}>
+          Loading chart data...
+        </Typography>
       </Box>
     );
   }
@@ -252,37 +287,40 @@ const EfficientFrontierChart = () => {
   const markedAboveWOSS = markLineData(aboveWOSS);
   const markedBelowWOSS = markLineData(belowWOSS);
 
-  // console.log(gmvpWSS);
-  // console.log(gmvpWOSS);
-
   return (
     <Box
-      width="80%"
+      width="85%"
       height="100%"
       component={Paper}
-      elevation={3} // stronger shadow
+      elevation={2}
       sx={{
         transition: "transform 0.3s ease, box-shadow 0.3s ease",
         "&:hover": {
-          transform: "translateY(-2px) scale(1.0001)",
-          boxShadow: 5,
+          transform: "translateY(-3px)",
+          boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
         },
+        backgroundColor: "#FFFFFF",
+        borderRadius: "8px",
+        overflow: "hidden",
+        border: `1px solid ${colorPalette.platinum}`,
       }}
     >
-      <Box width="90%" height="90%" display="flex" justifyContent="center" margin={4}>
+      <Box width="92%" height="90%" display="flex" justifyContent="center" margin="auto" py={4}>
         <ResponsiveContainer>
-          <ComposedChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <ComposedChart margin={{ top: 20, right: 30, bottom: 30, left: 20 }}>
             <XAxis
               dataKey="risk"
               type="number"
               domain={[0, (dataMax) => Number((dataMax * 1.05).toFixed(2))]}
-              tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
+              tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "0.9rem", fill: colorPalette.charcoal }}
               label={{
                 value: "Risk (%)",
                 position: "insideBottom",
                 offset: -10,
-                fontSize: "1.2rem",
+                fontSize: "1rem",
+                fill: colorPalette.prussianBlue,
               }}
+              stroke={colorPalette.charcoal}
             />
             <YAxis
               dataKey="return"
@@ -291,14 +329,16 @@ const EfficientFrontierChart = () => {
                 (dataMin) => Number((dataMin * 1.05).toFixed(2)),
                 (dataMax) => Number((dataMax * 1.2).toFixed(2)),
               ]}
-              tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "1.2rem" }}
+              tick={{ fontFamily: "'Roboto', sans-serif", fontSize: "0.9rem", fill: colorPalette.charcoal }}
               label={{
                 value: "Return (%)",
                 angle: -90,
                 position: "left",
                 offset: 10,
-                fontSize: "1.2rem",
+                fontSize: "1rem",
+                fill: colorPalette.prussianBlue,
               }}
+              stroke={colorPalette.charcoal}
             />
 
             {/* Use custom tooltip that only responds to funds */}
@@ -312,12 +352,13 @@ const EfficientFrontierChart = () => {
               type="monotone"
               data={markedBelowWSS}
               dataKey="return"
-              stroke="#8884d8"
+              stroke={colorPalette.prussianBlue}
               dot={false}
               activeDot={false}
               strokeDasharray="5 5"
               legendType="none"
               isAnimationActive={false}
+              strokeWidth={1.5}
             />
 
             <Line
@@ -325,10 +366,11 @@ const EfficientFrontierChart = () => {
               type="monotone"
               data={markedAboveWSS}
               dataKey="return"
-              stroke="#8884d8"
+              stroke={colorPalette.prussianBlue}
               dot={false}
               activeDot={false}
               isAnimationActive={false}
+              strokeWidth={2}
             />
 
             <Line
@@ -336,12 +378,13 @@ const EfficientFrontierChart = () => {
               type="monotone"
               data={markedBelowWOSS}
               dataKey="return"
-              stroke="#ff0000"
+              stroke={colorPalette.jasper}
               dot={false}
               activeDot={false}
               strokeDasharray="5 5"
               legendType="none"
               isAnimationActive={false}
+              strokeWidth={1.5}
             />
 
             <Line
@@ -349,10 +392,11 @@ const EfficientFrontierChart = () => {
               type="monotone"
               data={markedAboveWOSS}
               dataKey="return"
-              stroke="#ff0000"
+              stroke={colorPalette.jasper}
               dot={false}
               activeDot={false}
               isAnimationActive={false}
+              strokeWidth={2}
             />
 
             <Scatter
@@ -371,7 +415,7 @@ const EfficientFrontierChart = () => {
                 return: gmvpWOSS["return"] * 100,
                 name: "GMVP (Without Short Sales)"
               }]}
-              fill="#ff0000"
+              fill={colorPalette.jasper}
               shape={<CustomSquare />}
               legendType="square"
             />
@@ -384,11 +428,19 @@ const EfficientFrontierChart = () => {
                 return: gmvpWSS["return"] * 100,
                 name: "GMVP (With Short Sales)"
               }]}
-              fill="#8884d8"
+              fill={colorPalette.prussianBlue}
               shape={<CustomSquare />}
               legendType="square"
             />
-            <Legend verticalAlign="bottom" wrapperStyle={{ bottom: 0 }} />
+            <Legend 
+              verticalAlign="bottom" 
+              wrapperStyle={{ 
+                bottom: 0, 
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: "0.9rem",
+                color: colorPalette.charcoal
+              }} 
+            />
           </ComposedChart>
         </ResponsiveContainer>
       </Box>
