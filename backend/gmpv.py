@@ -242,6 +242,10 @@ def get_correlation_matrix():
     return jsonify(correlation_matrix.to_dict())
 
 
+@app.route("/var_cov_matrix", methods=["GET"])
+def get_var_cov_matrix():
+    return jsonify(cov_matrix.tolist())
+
 # portfolio page
 def utility_function(weights, mean_returns, cov_matrix, risk_aversion):
     """Utility function to minimize."""
