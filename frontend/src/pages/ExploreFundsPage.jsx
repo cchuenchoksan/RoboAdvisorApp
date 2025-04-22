@@ -9,6 +9,7 @@ import EfficientFrontierChart from "../components/EfficientFrontier";
 import FundsTable from "../components/FundsTable";
 import CorrelationMatrix from "../components/heatmap";
 import PortfolioBarChart from "../components/PortfolioBarChart";
+import CovarianceMatrix from "../components/heatmap2";
 
 // Color palette
 const colorPalette = {
@@ -159,7 +160,7 @@ const ExploreFundsPage = () => {
       
       <SectionTitle>Correlation Matrix</SectionTitle>
       
-      <Box display="flex" justifyContent="center" alignItems="center" mb={8}>
+      <Box display="flex" justifyContent="center" alignItems="center">
         <Box
           width="85%"
           component={Paper}
@@ -171,6 +172,23 @@ const ExploreFundsPage = () => {
           }}
         >
           <CorrelationMatrix />
+        </Box>
+      </Box>
+
+      <SectionTitle>Covariance Matrix</SectionTitle>
+      
+      <Box display="flex" justifyContent="center" alignItems="center" mb={8}>
+        <Box
+          width="85%"
+          component={Paper}
+          elevation={2}
+          sx={{
+            borderRadius: "8px",
+            overflow: "hidden",
+            border: `1px solid ${colorPalette.platinum}`,
+          }}
+        >
+          <CovarianceMatrix />
         </Box>
       </Box>
     </Box>

@@ -74,6 +74,9 @@ sharpe_ratios = (avg_returns - risk_free_rate) / std_devs
 # Compute correlation matrix
 correlation_matrix = pd.DataFrame(returns, index=fund_tickers).T.corr()
 
+# Compute correlation matrix
+covariance_matrix = pd.DataFrame(returns, index=fund_tickers).T.cov()
+
 # Portfolio performance
 # def portfolio_performance(weights, avg_returns, cov_matrix):
 #     ret = np.dot(weights, avg_returns)
@@ -244,7 +247,7 @@ def get_correlation_matrix():
 
 @app.route("/var_cov_matrix", methods=["GET"])
 def get_var_cov_matrix():
-    return jsonify(cov_matrix.tolist())
+    return jsonify(covariance_matrix.to_dict())
 
 # portfolio page
 def utility_function(weights, mean_returns, cov_matrix, risk_aversion):
