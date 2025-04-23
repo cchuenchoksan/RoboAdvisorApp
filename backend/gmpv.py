@@ -101,7 +101,7 @@ def efficient_frontier(short_sales=True):
             {"type": "eq", "fun": lambda w: np.dot(w, avg_returns) - target_return},
         ]
 
-        bounds = [(-1, 1)] * num_assets if short_sales else [(0, 1)] * num_assets
+        bounds = None if short_sales else [(0, 1)] * num_assets
         init_guess = np.ones(num_assets) / num_assets
 
         opt = minimize(
