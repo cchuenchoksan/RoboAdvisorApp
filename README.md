@@ -21,7 +21,7 @@ This project implements a basic robo-advisory platform, combining a Python backe
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/roboadvisor.git
+git clone https://github.com/cchuenchoksan/RoboAdvisorApp.git
 cd roboadvisor
 ```
 
