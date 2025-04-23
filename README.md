@@ -15,7 +15,7 @@ A Vite-powered frontend with modular React components:
 - Components such as `EfficientFrontier.jsx`, `PortfolioPerformanceChart.jsx`, and `FundsTable.jsx` suggest financial portfolio analytics.
 - `NavBar.jsx`, `heatmap.jsx`, and others handle UI and visualizations.
 
-## ⚠️ Usage 
+## 📦 Usage 
 This project implements a basic robo-advisory platform, combining a Python backend for financial computation and a modern React frontend for user interaction and visualization.
 
 ### 1. Clone the Repository
